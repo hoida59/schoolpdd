@@ -586,7 +586,7 @@
             </div>
             <div class="video-loading" id="videoLoading">
                 <div>🔄 Загрузка игры...</div>
-                <div style="font-size: 14px; margin-top: 10px; color: #aaa;">Видео персонажа загружается</div>
+                <div style="font-size: 14px; margin-top: 10px; color: #aaa;" id="videoStatus"></div>
             </div>
         </div>
         
@@ -635,12 +635,14 @@
             const scaryOverlay = document.getElementById('scaryOverlay');
             const scaryVideo = document.getElementById('scaryVideo');
             const videoLoading = document.getElementById('videoLoading');
+            const videoStatus = document.getElementById('videoStatus');
             
             // Глобальные переменные для игры
             let gameLoopId = null;
             let playerVideo = null;
             let gameRunning = false;
             let scaryShown = false;
+            let useVideoPlayer = false;
             
             // Выделение выбранных ответов
             document.querySelectorAll('.option').forEach(option => {
@@ -770,69 +772,61 @@
                 document.getElementById('fio').value = savedFio;
             }
             
-            // Функция для загрузки видео с GitHub
-            function loadVideoFromGitHub(videoElement, filename) {
-                return new Promise((resolve, reject) => {
-                    // Пробуем разные пути
-                    const paths = [
-                        filename, // Текущая папка
-                        './' + filename, // Текущая папка
-                        window.location.pathname.split('/').slice(0, -1).join('/') + '/' + filename, // Текущий путь
-                        'https://raw.githubusercontent.com' + window.location.pathname.replace('/index.html', '') + '/' + filename
-                    ];
-                    
-                    let currentPathIndex = 0;
-                    
-                    function tryNextPath() {
-                        if (currentPathIndex >= paths.length) {
-                            reject(new Error('Все пути к видео не сработали'));
-                            return;
-                        }
-                        
-                        const path = paths[currentPathIndex];
-                        console.log('Пробуем путь к видео:', path);
-                        
-                        videoElement.src = path;
-                        videoElement.load();
-                        
-                        videoElement.oncanplay = function() {
-                            console.log('Видео загружено с пути:', path);
-                            resolve(path);
-                        };
-                        
-                        videoElement.onerror = function() {
-                            console.log('Ошибка загрузки видео с пути:', path);
-                            currentPathIndex++;
-                            setTimeout(tryNextPath, 100);
-                        };
-                    }
-                    
-                    tryNextPath();
-                });
+            // Функция проверки существования файла
+            async function checkFileExists(url) {
+                try {
+                    const response = await fetch(url, { method: 'HEAD' });
+                    return response.ok;
+                } catch (error) {
+                    return false;
+                }
             }
             
-            // Загрузка видео персонажа
-            function loadPlayerVideo() {
-                return new Promise((resolve) => {
-                    // Создаем видео элемент
-                    const video = document.createElement('video');
-                    video.muted = true;
-                    video.loop = true;
-                    video.playsInline = true;
-                    video.preload = 'auto';
+            // Загрузка видео персонажа (если файл существует)
+            async function loadPlayerVideo() {
+                const videoPaths = [
+                    'player_video.mp4',
+                    './player_video.mp4'
+                ];
+                
+                for (const path of videoPaths) {
+                    videoStatus.textContent = `Проверка видео: ${path}`;
+                    const exists = await checkFileExists(path);
                     
-                    // Пробуем загрузить
-                    loadVideoFromGitHub(video, 'player_video.mp4')
-                        .then(() => {
-                            console.log('Видео персонажа успешно загружено');
-                            resolve(video);
-                        })
-                        .catch((error) => {
-                            console.log('Не удалось загрузить видео персонажа:', error);
-                            // Возвращаем null, чтобы использовать стандартного персонажа
-                            resolve(null);
+                    if (exists) {
+                        console.log(`Видео найдено по пути: ${path}`);
+                        const video = document.createElement('video');
+                        video.src = path;
+                        video.muted = true;
+                        video.loop = true;
+                        video.playsInline = true;
+                        video.preload = 'auto';
+                        
+                        return new Promise((resolve) => {
+                            video.addEventListener('loadeddata', () => {
+                                console.log('Видео персонажа загружено');
+                                videoStatus.textContent = 'Видео персонажа загружено!';
+                                useVideoPlayer = true;
+                                resolve(video);
+                            });
+                            
+                            video.addEventListener('error', () => {
+                                console.log('Ошибка загрузки видео');
+                                videoStatus.textContent = 'Ошибка загрузки видео, используется стандартный персонаж';
+                                useVideoPlayer = false;
+                                resolve(null);
+                            });
+                            
+                            video.load();
                         });
-                });
+                    }
+                }
+                
+                // Если видео не найдено
+                console.log('Видео персонажа не найдено, используется стандартный персонаж');
+                videoStatus.textContent = 'Видео персонажа не найдено, используется стандартный персонаж';
+                useVideoPlayer = false;
+                return null;
             }
             
             // Запуск игры
@@ -843,6 +837,7 @@
                 
                 // Показываем индикатор загрузки
                 videoLoading.classList.add('show');
+                videoStatus.textContent = 'Проверка наличия видео...';
                 
                 // Установка размера канваса
                 function resizeCanvas() {
@@ -861,24 +856,22 @@
                 let lastObstacleTime = 0;
                 const obstacleInterval = 2000;
                 
-                // Загружаем видео персонажа
+                // Загружаем видео персонажа (если есть)
                 if (!playerVideo) {
-                    try {
-                        playerVideo = await loadPlayerVideo();
-                        if (playerVideo) {
-                            // Пробуем воспроизвести видео
-                            playerVideo.play().catch(e => {
-                                console.log('Автовоспроизведение видео заблокировано:', e);
-                            });
+                    playerVideo = await loadPlayerVideo();
+                    if (playerVideo) {
+                        try {
+                            await playerVideo.play();
+                        } catch (e) {
+                            console.log('Автовоспроизведение видео заблокировано');
                         }
-                    } catch (error) {
-                        console.log('Ошибка загрузки видео персонажа:', error);
-                        playerVideo = null;
                     }
                 }
                 
-                // Скрываем индикатор загрузки
-                videoLoading.classList.remove('show');
+                // Скрываем индикатор загрузки через 2 секунды
+                setTimeout(() => {
+                    videoLoading.classList.remove('show');
+                }, 2000);
                 
                 // Игрок
                 const player = {
@@ -985,8 +978,8 @@
                 
                 // Отрисовка игрока
                 function drawPlayer() {
-                    // Пробуем нарисовать видео, если оно загружено и готово
-                    if (playerVideo && playerVideo.readyState >= 2) {
+                    // Пробуем нарисовать видео, если оно есть и загружено
+                    if (useVideoPlayer && playerVideo && playerVideo.readyState >= 2) {
                         try {
                             if (player.ducking) {
                                 // Присевший персонаж
@@ -998,6 +991,7 @@
                             return;
                         } catch (e) {
                             console.log('Ошибка отрисовки видео персонажа:', e);
+                            useVideoPlayer = false;
                         }
                     }
                     
@@ -1201,17 +1195,10 @@
                     scaryOverlay.classList.add('show');
                     scaryVideo.currentTime = 0;
                     
-                    // Загружаем видео скримера
-                    loadVideoFromGitHub(scaryVideo, 'scary_video.mp4')
-                        .then(() => {
-                            console.log('Видео скримера загружено');
-                            scaryVideo.play().catch(e => {
-                                console.log('Не удалось воспроизвести скример:', e);
-                            });
-                        })
-                        .catch((error) => {
-                            console.log('Не удалось загрузить скример:', error);
-                        });
+                    // Пробуем воспроизвести скример
+                    scaryVideo.play().catch(e => {
+                        console.log('Не удалось воспроизвести скример:', e);
+                    });
                     
                     // Автозакрытие через 3 секунды
                     setTimeout(() => {
