@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Викторина ПДД</title>
+    <title>ПДД Викторина с Игрой</title>
     <style>
         * {
             margin: 0;
@@ -12,185 +12,475 @@
         
         body {
             font-family: Arial, sans-serif;
-            background: #000;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
             color: #fff;
             padding: 20px;
             min-height: 100vh;
         }
         
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
-            background: #1a1a1a;
-            border-radius: 10px;
+            background: rgba(30, 30, 30, 0.9);
+            border-radius: 15px;
             padding: 30px;
-            border: 1px solid #333;
+            border: 2px solid #338ef5;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
         
         h1 {
             color: #ffcc00;
             margin-bottom: 30px;
             text-align: center;
+            font-size: 32px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .quiz-section {
+            margin-bottom: 40px;
         }
         
         .question {
             margin-bottom: 25px;
-            padding-bottom: 25px;
-            border-bottom: 1px solid #333;
-        }
-        
-        .question:last-child {
-            border-bottom: none;
+            padding: 20px;
+            background: rgba(40, 40, 40, 0.8);
+            border-radius: 10px;
+            border-left: 4px solid #338ef5;
         }
         
         .question-label {
             font-size: 18px;
             margin-bottom: 15px;
             color: #fff;
-        }
-        
-        input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            background: #2a2a2a;
-            border: 1px solid #444;
-            border-radius: 5px;
-            color: #fff;
-            font-size: 16px;
-        }
-        
-        input[type="radio"] {
-            margin-right: 10px;
-        }
-        
-        .option {
-            display: block;
-            padding: 10px;
-            margin: 5px 0;
-            background: #2a2a2a;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        
-        .option:hover {
-            background: #333;
-        }
-        
-        button {
-            background: #ffcc00;
-            color: #000;
-            border: none;
-            padding: 15px 30px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 20px auto;
-            display: block;
-            width: 200px;
-        }
-        
-        button:hover {
-            background: #ffd633;
+            font-weight: 600;
         }
         
         .required {
             color: #ff3333;
         }
         
-        .result {
-            background: #1a1a1a;
-            padding: 20px;
-            border-radius: 5px;
-            margin-top: 20px;
-            display: none;
+        input[type="text"] {
+            width: 100%;
+            padding: 14px;
+            background: #2a2a2a;
+            border: 2px solid #444;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 16px;
+            transition: all 0.3s;
         }
         
-        .result.show {
-            display: block;
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #ffcc00;
+            box-shadow: 0 0 10px rgba(255, 204, 0, 0.3);
         }
         
-        .success {
-            color: #4CAF50;
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background: #2a2a2a;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        
+        .option:hover {
+            background: #333;
+            transform: translateX(5px);
+        }
+        
+        .option.selected {
+            background: rgba(51, 142, 245, 0.2);
+            border-color: #338ef5;
+        }
+        
+        .option input[type="radio"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+        
+        .road-sign {
+            width: 120px;
+            height: 120px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 15px auto;
+            border: 3px solid #ff3333;
+        }
+        
+        .road-sign img {
+            width: 80px;
+            height: 80px;
+        }
+        
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 16px 32px;
+            font-size: 18px;
             font-weight: bold;
-            margin-bottom: 10px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 200px;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #338ef5 0%, #1a6fd9 100%);
+            color: white;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(51, 142, 245, 0.3);
         }
         
         .game-btn {
-            background: #338ef5;
-            color: white;
-            margin-top: 10px;
+            background: linear-gradient(135deg, #ffcc00 0%, #ff9900 100%);
+            color: #000;
+        }
+        
+        .game-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(255, 204, 0, 0.3);
         }
         
         .game-btn:disabled {
             background: #666;
+            color: #999;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .result {
+            background: rgba(40, 40, 40, 0.9);
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 30px;
+            display: none;
+            border: 2px solid #4CAF50;
+        }
+        
+        .result.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .success {
+            color: #4CAF50;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .score-display {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        
+        .game-window {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .game-window.show {
+            display: flex;
+        }
+        
+        .game-container {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 15px;
+            border: 3px solid #ffcc00;
+            max-width: 800px;
+            width: 95%;
+            text-align: center;
+        }
+        
+        #gameCanvas {
+            background: #333;
+            border-radius: 10px;
+            width: 100%;
+            height: 400px;
+            display: block;
+            margin: 0 auto 15px;
+        }
+        
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #444;
+        }
+        
+        .game-title {
+            color: #ffcc00;
+            font-size: 24px;
+        }
+        
+        .game-score {
+            font-size: 22px;
+            color: #fff;
+            font-weight: bold;
+        }
+        
+        .game-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        
+        .control-btn {
+            padding: 10px 20px;
+            background: #444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .control-btn:hover {
+            background: #555;
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            color: #ccc;
+            font-size: 14px;
+        }
+        
+        .close-btn {
+            background: #ff3333;
+            color: white;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .scary-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2000;
+            display: none;
+        }
+        
+        .scary-overlay.show {
+            display: block;
+        }
+        
+        .scary-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .scary-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: red;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            z-index: 2001;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            #gameCanvas {
+                height: 300px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Викторина по правилам дорожного движения</h1>
+        <h1>🚦 Викторина по Правилам Дорожного Движения</h1>
         
-        <div class="question">
-            <div class="question-label">
-                <span class="required">*</span> Введите ФИО и класс:
+        <div class="quiz-section">
+            <div class="question">
+                <div class="question-label">
+                    <span class="required">*</span> Введите ФИО и класс:
+                </div>
+                <input type="text" id="fio" placeholder="Иванов Иван Иванович, 5А">
             </div>
-            <input type="text" id="fio" placeholder="Иванов Иван Иванович, 5А">
-        </div>
-        
-        <div class="question">
-            <div class="question-label">
-                <span class="required">*</span> Если светофор на перекрестке сломан и мигает желтым светом, пешеход может начать переход, просто убедившись, что машины остановились?
+            
+            <div class="question">
+                <div class="question-label">
+                    <span class="required">*</span> Если светофор на перекрестке сломан и мигает желтым светом, пешеход может начать переход, просто убедившись, что машины остановились?
+                </div>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q1" value="yes">
+                        Да
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="no">
+                        Нет
+                    </label>
+                </div>
             </div>
-            <label class="option">
-                <input type="radio" name="q1" value="yes"> Да
-            </label>
-            <label class="option">
-                <input type="radio" name="q1" value="no"> Нет
-            </label>
-        </div>
-        
-        <div class="question">
-            <div class="question-label">
-                <span class="required">*</span> Что означает этот знак?
+            
+            <div class="question">
+                <div class="question-label">
+                    <span class="required">*</span> Что означает этот дорожный знак?
+                </div>
+                <div class="road-sign">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Road_sign_3.1_RU.svg/120px-Road_sign_3.1_RU.svg.png" 
+                         alt="Дорожный знак">
+                </div>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q2" value="enter-prohibited">
+                        Въезд запрещен
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="dead-end">
+                        Впереди тупик
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="parking-prohibited">
+                        Стоянка запрещена
+                    </label>
+                </div>
             </div>
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Road_sign_3.1_RU.svg/120px-Road_sign_3.1_RU.svg.png" 
-                 alt="Дорожный знак" 
-                 style="margin-bottom: 15px; border-radius: 5px;">
-            <label class="option">
-                <input type="radio" name="q2" value="enter-prohibited"> Въезд запрещен
-            </label>
-            <label class="option">
-                <input type="radio" name="q2" value="dead-end"> Впереди тупик
-            </label>
-            <label class="option">
-                <input type="radio" name="q2" value="parking-prohibited"> Стоянка запрещена
-            </label>
+            
+            <div class="buttons">
+                <button id="submit-btn" class="btn submit-btn">✅ Отправить ответы</button>
+                <button id="game-btn" class="btn game-btn" disabled>🎮 Запустить игру "Дорожные Приключения"</button>
+            </div>
+            
+            <div class="result" id="result">
+                <div class="success">✅ Спасибо! Ваши ответы отправлены!</div>
+                <div class="score-display" id="score-text"></div>
+                <p style="text-align: center; margin: 20px 0; color: #ffcc00;">Теперь вы можете запустить обучающую игру!</p>
+            </div>
         </div>
-        
-        <button id="submit-btn">Отправить ответы</button>
-        
-        <div class="result" id="result">
-            <div class="success">✅ Спасибо! Ответы отправлены!</div>
-            <div id="score-text"></div>
-            <p>Теперь вы можете запустить игру:</p>
-            <button id="game-btn" class="game-btn" disabled>🎮 Запустить игру</button>
+    </div>
+
+    <!-- Окно игры -->
+    <div class="game-window" id="gameWindow">
+        <div class="game-container">
+            <div class="game-header">
+                <div class="game-title">🚗 Дорожные Приключения</div>
+                <div class="game-score">Счет: <span id="scoreDisplay">0</span></div>
+            </div>
+            <canvas id="gameCanvas" width="800" height="400"></canvas>
+            <div class="game-controls">
+                <button class="control-btn" id="jumpBtn">ПРЫЖОК (ПРОБЕЛ)</button>
+                <button class="control-btn" id="duckBtn">ПРИСЕСТЬ (СТРЕЛКА ВНИЗ)</button>
+                <button class="close-btn" id="closeGame">✕ ЗАКРЫТЬ ИГРУ</button>
+            </div>
+            <div class="instructions">
+                Управление: ПРОБЕЛ - прыжок, СТРЕЛКА ВНИЗ - присесть, избегайте препятствий на дороге!
+            </div>
         </div>
+    </div>
+
+    <!-- Скример (будет показан при 300 очках) -->
+    <div class="scary-overlay" id="scaryOverlay">
+        <video class="scary-video" id="scaryVideo" preload="auto">
+            <!-- ВСТАВЬТЕ ВАШЕ ВИДЕО СКРИМЕРА -->
+            <source src="scary_video.mp4" type="video/mp4">
+            Ваш браузер не поддерживает видео.
+        </video>
+        <button class="scary-close" id="closeScary">✕ Закрыть</button>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Страница загружена!');
+            console.log('Викторина по ПДД загружена!');
             
+            // Элементы DOM
             const submitBtn = document.getElementById('submit-btn');
             const gameBtn = document.getElementById('game-btn');
             const resultDiv = document.getElementById('result');
             const scoreText = document.getElementById('score-text');
+            const gameWindow = document.getElementById('gameWindow');
+            const closeGameBtn = document.getElementById('closeGame');
+            const scaryOverlay = document.getElementById('scaryOverlay');
+            const scaryVideo = document.getElementById('scaryVideo');
+            const closeScaryBtn = document.getElementById('closeScary');
             
+            // Выделение выбранных опций
+            document.querySelectorAll('.option').forEach(option => {
+                const radio = option.querySelector('input[type="radio"]');
+                radio.addEventListener('change', function() {
+                    // Убираем выделение у всех опций в группе
+                    const name = this.name;
+                    document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+                        r.closest('.option').classList.remove('selected');
+                    });
+                    
+                    // Добавляем выделение выбранной
+                    if (this.checked) {
+                        this.closest('.option').classList.add('selected');
+                    }
+                });
+            });
+            
+            // Отправка викторины
             submitBtn.addEventListener('click', function() {
-                console.log('Кнопка нажата!');
-                
                 // Проверка заполнения
                 const fio = document.getElementById('fio').value.trim();
                 const q1 = document.querySelector('input[name="q1"]:checked');
@@ -198,6 +488,7 @@
                 
                 if (!fio) {
                     alert('Пожалуйста, введите ФИО и класс');
+                    document.getElementById('fio').focus();
                     return;
                 }
                 
@@ -213,220 +504,77 @@
                 
                 // Проверка ответов
                 let score = 0;
-                if (q1.value === 'no') score++;
-                if (q2.value === 'enter-prohibited') score++;
+                let feedback = [];
+                
+                if (q1.value === 'no') {
+                    score++;
+                    feedback.push('✅ Вопрос 1: Верно! При неисправном светофоре пешеход должен быть особенно внимателен.');
+                } else {
+                    feedback.push('❌ Вопрос 1: Неверно. При мигающем желтом пешеход должен уступить дорогу всем транспортным средствам.');
+                }
+                
+                if (q2.value === 'enter-prohibited') {
+                    score++;
+                    feedback.push('✅ Вопрос 2: Верно! Это знак "Въезд запрещен".');
+                } else {
+                    feedback.push('❌ Вопрос 2: Неверно. Это знак "Въезд запрещен" (кирпич).');
+                }
                 
                 // Показ результатов
-                scoreText.innerHTML = `Ваш результат: ${score} из 2 правильных ответов<br><br>`;
-                
+                let resultMessage = '';
                 if (score === 2) {
-                    scoreText.innerHTML += '🎉 Отлично! Все ответы правильные!';
+                    resultMessage = '🎉 Отлично! Вы отлично знаете правила дорожного движения!';
                 } else if (score === 1) {
-                    scoreText.innerHTML += '👍 Хорошо, но есть ошибки.';
+                    resultMessage = '👍 Хорошо, но нужно повторить некоторые правила.';
                 } else {
-                    scoreText.innerHTML += '📚 Нужно повторить правила ПДД.';
+                    resultMessage = '📚 Вам стоит изучить правила дорожного движения внимательнее.';
                 }
+                
+                scoreText.innerHTML = `
+                    <strong>${resultMessage}</strong><br><br>
+                    <strong>Правильных ответов: ${score} из 2</strong><br><br>
+                    ${feedback.join('<br>')}
+                `;
                 
                 // Показываем результаты и активируем игру
                 resultDiv.classList.add('show');
                 gameBtn.disabled = false;
-                gameBtn.style.background = '#338ef5';
-                gameBtn.style.cursor = 'pointer';
                 
                 // Прокрутка к результатам
                 resultDiv.scrollIntoView({ behavior: 'smooth' });
+                
+                // Сохраняем результаты
+                localStorage.setItem('pdd_quiz_score', score);
+                localStorage.setItem('pdd_quiz_fio', fio);
             });
             
             // Запуск игры
             gameBtn.addEventListener('click', function() {
                 if (!gameBtn.disabled) {
-                    startGame();
+                    gameWindow.classList.add('show');
+                    startRoadGame();
                 }
             });
             
-            function startGame() {
-                // Создаем окно игры
-                const gameWindow = document.createElement('div');
-                gameWindow.style.cssText = `
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background: rgba(0,0,0,0.95);
-                    z-index: 1000;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                `;
-                
-                const gameContent = document.createElement('div');
-                gameContent.style.cssText = `
-                    background: #1a1a1a;
-                    padding: 30px;
-                    border-radius: 10px;
-                    border: 2px solid #ffcc00;
-                    max-width: 500px;
-                    width: 90%;
-                    text-align: center;
-                `;
-                
-                gameContent.innerHTML = `
-                    <h2 style="color:#ffcc00; margin-bottom:20px;">🎮 Бегущий динозавр</h2>
-                    <div style="background:#2a2a2a; padding:20px; border-radius:5px; margin-bottom:20px;">
-                        <canvas id="gameCanvas" width="400" height="200" style="background:#333; border-radius:5px;"></canvas>
-                    </div>
-                    <p style="margin:10px 0; color:#ccc">Нажмите ПРОБЕЛ для прыжка</p>
-                    <div id="gameScore" style="font-size:20px; color:#ffcc00; margin:10px 0;">Счет: 0</div>
-                    <button id="closeGame" style="background:#ff3333; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; margin-top:10px;">Закрыть игру</button>
-                `;
-                
-                gameWindow.appendChild(gameContent);
-                document.body.appendChild(gameWindow);
-                
-                // Запускаем простую игру
-                const canvas = document.getElementById('gameCanvas');
-                const ctx = canvas.getContext('2d');
-                const scoreElement = document.getElementById('gameScore');
-                
-                let score = 0;
-                let gameRunning = true;
-                
-                // Игрок
-                const player = {
-                    x: 50,
-                    y: 150,
-                    width: 40,
-                    height: 60,
-                    jumping: false,
-                    velocity: 0
-                };
-                
-                // Препятствия
-                let obstacles = [];
-                
-                function draw() {
-                    // Очистка
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    
-                    // Игрок
-                    ctx.fillStyle = '#338ef5';
-                    ctx.fillRect(player.x, player.y, player.width, player.height);
-                    
-                    // Глаза
-                    ctx.fillStyle = '#fff';
-                    ctx.fillRect(player.x + player.width - 10, player.y + 10, 8, 8);
-                    
-                    // Препятствия
-                    ctx.fillStyle = '#ff3333';
-                    obstacles.forEach(obstacle => {
-                        ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
-                    });
-                    
-                    // Счет
-                    scoreElement.textContent = `Счет: ${score}`;
+            // Закрытие игры
+            closeGameBtn.addEventListener('click', function() {
+                gameWindow.classList.remove('show');
+                // Останавливаем игровой цикл
+                if (window.gameAnimationId) {
+                    cancelAnimationFrame(window.gameAnimationId);
                 }
-                
-                function update() {
-                    if (!gameRunning) return;
-                    
-                    score++;
-                    
-                    // Игрок
-                    if (player.jumping) {
-                        player.velocity += 0.5;
-                        player.y += player.velocity;
-                        
-                        if (player.y >= 150) {
-                            player.y = 150;
-                            player.jumping = false;
-                            player.velocity = 0;
-                        }
-                    }
-                    
-                    // Препятствия
-                    if (Math.random() < 0.02) {
-                        obstacles.push({
-                            x: 400,
-                            y: 160,
-                            width: 30,
-                            height: 40,
-                            speed: 3
-                        });
-                    }
-                    
-                    obstacles.forEach((obstacle, index) => {
-                        obstacle.x -= obstacle.speed;
-                        
-                        // Столкновение
-                        if (player.x < obstacle.x + obstacle.width &&
-                            player.x + player.width > obstacle.x &&
-                            player.y < obstacle.y + obstacle.height &&
-                            player.y + player.height > obstacle.y) {
-                            gameRunning = false;
-                            alert('Игра окончена! Ваш счет: ' + score);
-                        }
-                        
-                        if (obstacle.x < -30) {
-                            obstacles.splice(index, 1);
-                        }
-                    });
-                }
-                
-                function gameLoop() {
-                    update();
-                    draw();
-                    if (gameRunning) {
-                        requestAnimationFrame(gameLoop);
-                    }
-                }
-                
-                // Управление
-                document.addEventListener('keydown', function(e) {
-                    if (e.code === 'Space' && !player.jumping && gameRunning) {
-                        player.jumping = true;
-                        player.velocity = -12;
-                    }
-                });
-                
-                canvas.addEventListener('click', function() {
-                    if (!player.jumping && gameRunning) {
-                        player.jumping = true;
-                        player.velocity = -12;
-                    }
-                });
-                
-                // Закрытие игры
-                document.getElementById('closeGame').addEventListener('click', function() {
-                    document.body.removeChild(gameWindow);
-                });
-                
-                // Закрытие по клику вне окна
-                gameWindow.addEventListener('click', function(e) {
-                    if (e.target === gameWindow) {
-                        document.body.removeChild(gameWindow);
-                    }
-                });
-                
-                // Запуск игрового цикла
-                gameLoop();
-            }
-            
-            // Анимация кнопок при наведении
-            const buttons = document.querySelectorAll('button');
-            buttons.forEach(btn => {
-                btn.addEventListener('mouseenter', () => {
-                    btn.style.transform = 'scale(1.05)';
-                });
-                btn.addEventListener('mouseleave', () => {
-                    btn.style.transform = 'scale(1)';
-                });
             });
             
-            // Автосохранение в LocalStorage
+            // Закрытие скримера
+            closeScaryBtn.addEventListener('click', function() {
+                scaryOverlay.classList.remove('show');
+                scaryVideo.pause();
+                scaryVideo.currentTime = 0;
+            });
+            
+            // Автосохранение введенных данных
             document.getElementById('fio').addEventListener('input', function() {
-                localStorage.setItem('fio', this.value);
+                localStorage.setItem('pdd_fio_temp', this.value);
             });
             
             document.querySelectorAll('input[type="radio"]').forEach(radio => {
@@ -435,22 +583,388 @@
                         q1: document.querySelector('input[name="q1"]:checked')?.value,
                         q2: document.querySelector('input[name="q2"]:checked')?.value
                     };
-                    localStorage.setItem('answers', JSON.stringify(answers));
+                    localStorage.setItem('pdd_answers_temp', JSON.stringify(answers));
                 });
             });
             
             // Восстановление сохраненных данных
-            const savedFio = localStorage.getItem('fio');
+            const savedFio = localStorage.getItem('pdd_fio_temp');
             if (savedFio) {
                 document.getElementById('fio').value = savedFio;
             }
             
-            const savedAnswers = JSON.parse(localStorage.getItem('answers') || '{}');
+            const savedAnswers = JSON.parse(localStorage.getItem('pdd_answers_temp') || '{}');
             if (savedAnswers.q1) {
-                document.querySelector(`input[name="q1"][value="${savedAnswers.q1}"]`).checked = true;
+                const radio = document.querySelector(`input[name="q1"][value="${savedAnswers.q1}"]`);
+                if (radio) {
+                    radio.checked = true;
+                    radio.closest('.option').classList.add('selected');
+                }
             }
             if (savedAnswers.q2) {
-                document.querySelector(`input[name="q2"][value="${savedAnswers.q2}"]`).checked = true;
+                const radio = document.querySelector(`input[name="q2"][value="${savedAnswers.q2}"]`);
+                if (radio) {
+                    radio.checked = true;
+                    radio.closest('.option').classList.add('selected');
+                }
+            }
+            
+            // Функция запуска игры с дорожной тематикой
+            function startRoadGame() {
+                const canvas = document.getElementById('gameCanvas');
+                const ctx = canvas.getContext('2d');
+                const scoreDisplay = document.getElementById('scoreDisplay');
+                
+                // Сброс игровых переменных
+                let score = 0;
+                let gameRunning = true;
+                let gameSpeed = 3; // Начальная скорость игры
+                let lastObstacleTime = 0;
+                const obstacleInterval = 1800; // Интервал между препятствиями (мс)
+                
+                // Создаем элемент видео для персонажа
+                const playerVideo = document.createElement('video');
+                playerVideo.src = 'player_video.mp4'; // ВАШЕ ВИДЕО
+                playerVideo.muted = true;
+                playerVideo.loop = true;
+                playerVideo.playsInline = true;
+                
+                // Игрок (пешеход)
+                const player = {
+                    x: 100,
+                    y: canvas.height - 120,
+                    width: 60,
+                    height: 100,
+                    jumping: false,
+                    ducking: false,
+                    velocity: 0,
+                    gravity: 0.5,
+                    jumpPower: -15,
+                    groundY: canvas.height - 120
+                };
+                
+                // Массив препятствий (автомобили)
+                let obstacles = [];
+                
+                // Дорожная разметка
+                let roadMarkers = [];
+                for (let i = 0; i < 10; i++) {
+                    roadMarkers.push({
+                        x: i * 100,
+                        y: canvas.height - 60
+                    });
+                }
+                
+                // Загрузка изображения автомобиля
+                const carImg = new Image();
+                carImg.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iMzAiIHZpZXdCb3g9IjAgMCA2MCAzMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjMwIiByeD0iNSIgZmlsbD0iIzMzOEVGNSIvPgo8cmVjdCB4PSI1IiB5PSI1IiB3aWR0aD0iNTAiIGhlaWdodD0iMjAiIHJ4PSIzIiBmaWxsPSIjMUE2RkQ5Ii8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMjUiIHI9IjQiIGZpbGw9IiMyNjI2MjYiLz4KPGNpcmNsZSBjeD0iNDUiIGN5PSIyNSIgcj0iNCIgZmlsbD0iIzI2MjYyNiIvPgo8L3N2Zz4K';
+                
+                // Запуск видео персонажа
+                playerVideo.play().catch(e => {
+                    console.log('Видео не может автозапуститься:', e);
+                });
+                
+                // Функция отрисовки дороги
+                function drawRoad() {
+                    // Небо
+                    const skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height * 0.7);
+                    skyGradient.addColorStop(0, '#87CEEB');
+                    skyGradient.addColorStop(1, '#E0F7FF');
+                    ctx.fillStyle = skyGradient;
+                    ctx.fillRect(0, 0, canvas.width, canvas.height * 0.7);
+                    
+                    // Солнце
+                    ctx.fillStyle = '#FFD700';
+                    ctx.beginPath();
+                    ctx.arc(canvas.width - 50, 50, 25, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Трава
+                    ctx.fillStyle = '#228B22';
+                    ctx.fillRect(0, canvas.height * 0.7, canvas.width, 20);
+                    
+                    // Дорога (асфальт)
+                    ctx.fillStyle = '#696969';
+                    ctx.fillRect(0, canvas.height * 0.7 + 20, canvas.width, canvas.height * 0.3 - 20);
+                    
+                    // Дорожная разметка
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.strokeStyle = '#FFFFFF';
+                    ctx.lineWidth = 3;
+                    
+                    // Центральная прерывистая линия
+                    for (let i = 0; i < roadMarkers.length; i++) {
+                        const marker = roadMarkers[i];
+                        ctx.fillRect(marker.x, marker.y, 40, 5);
+                        marker.x -= gameSpeed;
+                        if (marker.x < -50) {
+                            marker.x = canvas.width;
+                        }
+                    }
+                    
+                    // Боковые линии
+                    ctx.fillRect(0, canvas.height * 0.7 + 30, canvas.width, 3);
+                    ctx.fillRect(0, canvas.height - 30, canvas.width, 3);
+                }
+                
+                // Функция отрисовки игрока
+                function drawPlayer() {
+                    if (playerVideo.readyState >= 2) { // HAVE_CURRENT_DATA или выше
+                        try {
+                            // Рисуем видео персонажа
+                            if (player.ducking) {
+                                // Присевший персонаж
+                                ctx.drawImage(playerVideo, player.x, player.y + 30, player.width, 70);
+                            } else {
+                                // Стоящий персонаж
+                                ctx.drawImage(playerVideo, player.x, player.y, player.width, player.height);
+                            }
+                        } catch (e) {
+                            // Запасной вариант, если видео не рисуется
+                            drawPlayerFallback();
+                        }
+                    } else {
+                        drawPlayerFallback();
+                    }
+                }
+                
+                // Запасной вариант рисования игрока
+                function drawPlayerFallback() {
+                    // Тело (светофорная расцветка)
+                    ctx.fillStyle = player.ducking ? '#FF3333' : '#FFCC00';
+                    ctx.fillRect(player.x, player.y, player.width, player.ducking ? 70 : player.height);
+                    
+                    // Голова
+                    ctx.fillStyle = '#338ef5';
+                    ctx.beginPath();
+                    ctx.arc(player.x + player.width/2, player.y - 10, 15, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Глаза
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(player.x + player.width/2 - 8, player.y - 15, 6, 8);
+                    ctx.fillRect(player.x + player.width/2 + 2, player.y - 15, 6, 8);
+                    
+                    // Улыбка
+                    ctx.beginPath();
+                    ctx.arc(player.x + player.width/2, player.y - 5, 8, 0, Math.PI);
+                    ctx.strokeStyle = 'white';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+                
+                // Функция отрисовки препятствий (автомобилей)
+                function drawObstacles() {
+                    for (let obstacle of obstacles) {
+                        // Рисуем автомобиль
+                        if (carImg.complete) {
+                            ctx.drawImage(carImg, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                        } else {
+                            // Запасной вариант
+                            ctx.fillStyle = '#338ef5';
+                            ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                            
+                            // Окна автомобиля
+                            ctx.fillStyle = '#1a6fd9';
+                            ctx.fillRect(obstacle.x + 5, obstacle.y + 5, obstacle.width - 10, 10);
+                            
+                            // Колеса
+                            ctx.fillStyle = '#262626';
+                            ctx.beginPath();
+                            ctx.arc(obstacle.x + 15, obstacle.y + obstacle.height, 5, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.beginPath();
+                            ctx.arc(obstacle.x + obstacle.width - 15, obstacle.y + obstacle.height, 5, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+                }
+                
+                // Функция обновления игры
+                function update(currentTime) {
+                    if (!gameRunning) return;
+                    
+                    // Увеличиваем счет
+                    score++;
+                    scoreDisplay.textContent = score;
+                    
+                    // Постепенно увеличиваем скорость
+                    if (score % 500 === 0) {
+                        gameSpeed = Math.min(gameSpeed + 0.5, 8); // Максимальная скорость 8
+                    }
+                    
+                    // Обновление игрока
+                    if (player.jumping) {
+                        player.velocity += player.gravity;
+                        player.y += player.velocity;
+                        
+                        if (player.y >= player.groundY) {
+                            player.y = player.groundY;
+                            player.jumping = false;
+                            player.velocity = 0;
+                        }
+                    }
+                    
+                    if (player.ducking && !player.jumping) {
+                        player.height = 70;
+                    } else if (!player.jumping) {
+                        player.height = 100;
+                    }
+                    
+                    // Создание новых препятствий (реже и предсказуемее)
+                    if (currentTime - lastObstacleTime > obstacleInterval) {
+                        const obstacleTypes = [
+                            { width: 60, height: 30, y: canvas.height - 100 }, // Легковой автомобиль
+                            { width: 80, height: 35, y: canvas.height - 105 }, // Грузовик
+                            { width: 60, height: 30, y: canvas.height - 100 }  // Еще один легковой
+                        ];
+                        
+                        const type = Math.floor(Math.random() * obstacleTypes.length);
+                        obstacles.push({
+                            x: canvas.width,
+                            y: obstacleTypes[type].y,
+                            width: obstacleTypes[type].width,
+                            height: obstacleTypes[type].height,
+                            speed: gameSpeed + Math.random() * 1.5 // Скорость зависит от gameSpeed
+                        });
+                        
+                        lastObstacleTime = currentTime;
+                    }
+                    
+                    // Обновление препятствий
+                    for (let i = obstacles.length - 1; i >= 0; i--) {
+                        obstacles[i].x -= obstacles[i].speed;
+                        
+                        // Проверка столкновения (более мягкая)
+                        if (player.x < obstacles[i].x + obstacles[i].width - 10 &&
+                            player.x + player.width - 10 > obstacles[i].x &&
+                            player.y < obstacles[i].y + obstacles[i].height - 10 &&
+                            player.y + player.height - 10 > obstacles[i].y) {
+                            
+                            gameOver();
+                            return;
+                        }
+                        
+                        // Удаление вышедших за экран
+                        if (obstacles[i].x + obstacles[i].width < 0) {
+                            obstacles.splice(i, 1);
+                        }
+                    }
+                    
+                    // Проверка на скример (300 очков)
+                    if (score === 300 && !window.scaryShown) {
+                        window.scaryShown = true;
+                        showScary();
+                    }
+                }
+                
+                // Функция отрисовки игры
+                function draw() {
+                    // Очистка канваса
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    
+                    // Рисуем дорогу
+                    drawRoad();
+                    
+                    // Рисуем препятствия
+                    drawObstacles();
+                    
+                    // Рисуем игрока
+                    drawPlayer();
+                    
+                    // Отображение скорости
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.font = '16px Arial';
+                    ctx.fillText(`Скорость: ${gameSpeed.toFixed(1)}`, 20, 30);
+                }
+                
+                // Игровой цикл
+                function gameLoop(timestamp) {
+                    update(timestamp);
+                    draw();
+                    
+                    if (gameRunning) {
+                        window.gameAnimationId = requestAnimationFrame(gameLoop);
+                    }
+                }
+                
+                // Завершение игры
+                function gameOver() {
+                    gameRunning = false;
+                    cancelAnimationFrame(window.gameAnimationId);
+                    
+                    setTimeout(() => {
+                        alert(`Игра окончена! Ваш счет: ${score}\nПравила дорожного движения важны для безопасности!`);
+                        gameWindow.classList.remove('show');
+                    }, 500);
+                }
+                
+                // Показать скример
+                function showScary() {
+                    scaryOverlay.classList.add('show');
+                    scaryVideo.currentTime = 0;
+                    scaryVideo.play().catch(e => {
+                        console.log('Скример не может воспроизвестись:', e);
+                    });
+                    
+                    // Автоматическое закрытие через 5 секунд
+                    setTimeout(() => {
+                        scaryOverlay.classList.remove('show');
+                        scaryVideo.pause();
+                        scaryVideo.currentTime = 0;
+                    }, 5000);
+                }
+                
+                // Управление игрой
+                function jump() {
+                    if (!player.jumping && gameRunning) {
+                        player.jumping = true;
+                        player.velocity = player.jumpPower;
+                        player.ducking = false;
+                    }
+                }
+                
+                function duck(start) {
+                    if (gameRunning) {
+                        player.ducking = start;
+                    }
+                }
+                
+                // Обработчики управления
+                document.addEventListener('keydown', function(e) {
+                    if (e.code === 'Space' || e.code === 'ArrowUp') {
+                        jump();
+                    } else if (e.code === 'ArrowDown') {
+                        duck(true);
+                    }
+                });
+                
+                document.addEventListener('keyup', function(e) {
+                    if (e.code === 'ArrowDown') {
+                        duck(false);
+                    }
+                });
+                
+                canvas.addEventListener('click', function(e) {
+                    const rect = canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    
+                    if (x > canvas.width / 2) {
+                        jump();
+                    } else {
+                        duck(true);
+                        setTimeout(() => duck(false), 500);
+                    }
+                });
+                
+                // Кнопки управления
+                document.getElementById('jumpBtn').addEventListener('click', jump);
+                document.getElementById('duckBtn').addEventListener('mousedown', () => duck(true));
+                document.getElementById('duckBtn').addEventListener('mouseup', () => duck(false));
+                
+                // Запуск игрового цикла
+                window.gameAnimationId = requestAnimationFrame(gameLoop);
+                window.scaryShown = false;
             }
         });
     </script>
