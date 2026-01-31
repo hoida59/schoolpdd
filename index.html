@@ -5,7 +5,7 @@
     <title>ПДД Викторина с Игрой</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
-        /* Базовые сбросы для мобильных */
+        /* СТИЛИ ВСЕ В ОДНОМ ФАЙЛЕ */
         * {
             margin: 0;
             padding: 0;
@@ -23,13 +23,11 @@
             touch-action: manipulation;
         }
         
-        /* Контейнер */
         .container {
             max-width: 100%;
             padding: 15px;
         }
         
-        /* Заголовок */
         h1 {
             color: #FFCC00;
             text-align: center;
@@ -39,7 +37,6 @@
             padding: 0 10px;
         }
         
-        /* Карточка викторины */
         .quiz-card {
             background: rgba(30, 30, 30, 0.95);
             border-radius: 20px;
@@ -49,7 +46,6 @@
             backdrop-filter: blur(10px);
         }
         
-        /* Вопрос */
         .question {
             margin-bottom: 25px;
             padding-bottom: 20px;
@@ -72,7 +68,6 @@
             color: #FF3333;
         }
         
-        /* Поле ввода */
         .input-field {
             width: 100%;
             padding: 16px;
@@ -91,7 +86,6 @@
             background: rgba(255,255,255,0.12);
         }
         
-        /* Знак дорожный */
         .road-sign-container {
             display: flex;
             justify-content: center;
@@ -115,7 +109,6 @@
             height: 80px;
         }
         
-        /* Варианты ответов */
         .options {
             display: flex;
             flex-direction: column;
@@ -149,7 +142,6 @@
             height: 20px;
         }
         
-        /* Кнопки */
         .buttons {
             display: flex;
             flex-direction: column;
@@ -194,7 +186,6 @@
             cursor: not-allowed;
         }
         
-        /* Результаты */
         .result {
             background: rgba(40, 40, 40, 0.95);
             border-radius: 15px;
@@ -236,7 +227,6 @@
             font-size: 18px;
         }
         
-        /* Модальное окно игры */
         .game-modal {
             position: fixed;
             top: 0;
@@ -352,7 +342,6 @@
             margin-top: 10px;
         }
         
-        /* Окно отсчета перед скримером */
         .countdown-modal {
             position: fixed;
             top: 0;
@@ -393,7 +382,6 @@
             padding: 0 20px;
         }
         
-        /* Скример */
         .scary-overlay {
             position: fixed;
             top: 0;
@@ -415,7 +403,6 @@
             object-fit: cover;
         }
         
-        /* Индикатор загрузки видео */
         .video-loading {
             position: absolute;
             top: 50%;
@@ -435,7 +422,6 @@
             display: block;
         }
         
-        /* Адаптация под очень маленькие экраны */
         @media (max-width: 360px) {
             h1 {
                 font-size: 24px;
@@ -488,17 +474,25 @@
             }
         }
         
-        /* Улучшение скролла на iOS */
         .quiz-card, .game-modal {
             -webkit-overflow-scrolling: touch;
         }
         
-        /* Убираем выделение при долгом нажатии на мобильных */
         .option, .btn, .mobile-btn {
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
+        }
+        
+        /* Простая анимация динозавра (запасная графика) */
+        .dino-leg {
+            animation: dinoRun 0.3s infinite alternate;
+        }
+        
+        @keyframes dinoRun {
+            from { transform: translateY(0); }
+            to { transform: translateY(-3px); }
         }
     </style>
 </head>
@@ -613,15 +607,16 @@
     <!-- Скример -->
     <div class="scary-overlay" id="scaryOverlay">
         <video class="scary-video" id="scaryVideo" playsinline muted>
-            <!-- Видео скримера -->
-            <source src="jump_scare.mp4" type="video/mp4">
+            <!-- Если нет jump_scare.mp4, покажем черный экран -->
         </video>
     </div>
 
     <script>
+        // ВСЁ В ОДНОМ JS ФАЙЛЕ
+        
         // Проверка загрузки страницы
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Страница загружена!');
+            console.log('🎮 Страница загружена!');
             
             // Основные элементы
             const submitBtn = document.getElementById('submit-btn');
@@ -643,6 +638,9 @@
             let gameRunning = false;
             let scaryShown = false;
             let useVideoPlayer = false;
+            let playerVideoLoaded = false;
+            
+            // =========== ВИКТОРИНА ===========
             
             // Выделение выбранных ответов
             document.querySelectorAll('.option').forEach(option => {
@@ -734,6 +732,7 @@
                 // Показываем результаты и активируем игру
                 resultDiv.classList.add('show');
                 gameBtn.disabled = false;
+                gameBtn.style.animation = 'pulse 2s infinite';
                 
                 // Сохранение в localStorage
                 localStorage.setItem('pdd_fio', fio);
@@ -772,149 +771,105 @@
                 document.getElementById('fio').value = savedFio;
             }
             
-            // Функция загрузки видео персонажа с улучшенной обработкой ошибок
-            async function loadPlayerVideo() {
-                console.log('🔄 Загрузка видео персонажа...');
-                videoStatus.textContent = 'Загрузка видео персонажа...';
+            // =========== ИГРА ===========
+            
+            // Улучшенная функция загрузки видео с несколькими попытками
+            async function loadVideoPlayer() {
+                console.log('🎬 Пробуем загрузить видео персонажа...');
+                videoStatus.textContent = 'Поиск видео персонажа...';
                 
-                const videoPaths = [
+                // Список возможных видеофайлов
+                const videoFiles = [
+                    'lv_0_20260125005509.mp4',  // Пробуем сначала этот
+                    './lv_0_20260125005509.mp4',
                     'runner_video.mp4',
                     './runner_video.mp4',
-                    'runner.mp4',
-                    './runner.mp4',
                     'player.mp4',
                     './player.mp4'
                 ];
                 
-                for (const path of videoPaths) {
-                    console.log('🔍 Пробуем загрузить видео по пути:', path);
-                    videoStatus.textContent = `Пробуем загрузить: ${path}`;
+                for (let i = 0; i < videoFiles.length; i++) {
+                    const videoPath = videoFiles[i];
+                    console.log(`🔍 Пробуем: ${videoPath}`);
+                    videoStatus.textContent = `Пробуем: ${videoPath}`;
                     
                     try {
-                        // Создаем новый элемент video
-                        const video = document.createElement('video');
-                        video.src = path;
-                        video.muted = true;
-                        video.loop = true;
-                        video.playsInline = true;
-                        video.preload = 'auto';
-                        video.style.display = 'none';
-                        video.crossOrigin = 'anonymous';
-                        
-                        // Добавляем атрибуты для лучшей совместимости
-                        video.setAttribute('webkit-playsinline', '');
-                        video.setAttribute('playsinline', '');
-                        
-                        return new Promise((resolve) => {
-                            let loaded = false;
-                            let error = false;
+                        // Создаем тестовый запрос для проверки файла
+                        const response = await fetch(videoPath, { method: 'HEAD' });
+                        if (response.ok) {
+                            console.log(`✅ Файл найден: ${videoPath}`);
                             
-                            const onSuccess = () => {
-                                if (!loaded && !error) {
-                                    loaded = true;
-                                    console.log(`✅ Видео загружено успешно: ${path}`);
-                                    videoStatus.textContent = 'Видео персонажа загружено!';
+                            const video = document.createElement('video');
+                            video.src = videoPath;
+                            video.muted = true;
+                            video.loop = true;
+                            video.playsInline = true;
+                            video.preload = 'auto';
+                            video.style.display = 'none';
+                            
+                            // Добавляем в DOM для лучшей совместимости
+                            document.body.appendChild(video);
+                            
+                            return new Promise((resolve) => {
+                                const timeoutId = setTimeout(() => {
+                                    console.log(`⏰ Таймаут загрузки: ${videoPath}`);
+                                    resolve(null);
+                                }, 3000);
+                                
+                                video.addEventListener('loadeddata', () => {
+                                    clearTimeout(timeoutId);
+                                    console.log(`✅ Видео загружено: ${videoPath}`);
+                                    videoStatus.textContent = 'Видео загружено!';
+                                    playerVideoLoaded = true;
                                     useVideoPlayer = true;
-                                    
-                                    // Удаляем обработчики событий
-                                    video.removeEventListener('loadeddata', onSuccess);
-                                    video.removeEventListener('canplay', onSuccess);
-                                    video.removeEventListener('canplaythrough', onSuccess);
-                                    video.removeEventListener('error', onError);
-                                    
                                     resolve(video);
-                                }
-                            };
-                            
-                            const onError = (e) => {
-                                if (!loaded && !error) {
-                                    error = true;
-                                    console.log(`❌ Ошибка загрузки видео ${path}:`, e);
-                                    
-                                    // Удаляем обработчики событий
-                                    video.removeEventListener('loadeddata', onSuccess);
-                                    video.removeEventListener('canplay', onSuccess);
-                                    video.removeEventListener('canplaythrough', onSuccess);
-                                    video.removeEventListener('error', onError);
-                                    
-                                    // Удаляем элемент video
+                                });
+                                
+                                video.addEventListener('error', () => {
+                                    clearTimeout(timeoutId);
+                                    console.log(`❌ Ошибка загрузки: ${videoPath}`);
                                     if (video.parentNode) {
                                         video.parentNode.removeChild(video);
                                     }
-                                    
                                     resolve(null);
-                                }
-                            };
-                            
-                            // Добавляем обработчики событий
-                            video.addEventListener('loadeddata', onSuccess);
-                            video.addEventListener('canplay', onSuccess);
-                            video.addEventListener('canplaythrough', onSuccess);
-                            video.addEventListener('error', onError);
-                            
-                            // Добавляем в DOM и загружаем
-                            document.body.appendChild(video);
-                            video.load();
-                            
-                            // Таймаут 3 секунды
-                            setTimeout(() => {
-                                if (!loaded && !error) {
-                                    console.log(`⏰ Таймаут загрузки видео: ${path}`);
-                                    onError(new Error('Таймаут загрузки'));
-                                }
-                            }, 3000);
-                        });
-                        
+                                });
+                                
+                                video.load();
+                            });
+                        }
                     } catch (error) {
-                        console.log('❌ Исключение при создании видео:', error);
+                        console.log(`❌ Ошибка при проверке: ${videoPath}`, error);
                         continue;
                     }
                 }
                 
-                console.log('⚠️ Не удалось загрузить видео персонажа');
-                videoStatus.textContent = 'Видео персонажа не найдено, используем анимацию';
+                console.log('⚠️ Все видеофайлы недоступны');
+                videoStatus.textContent = 'Видео не найдено, используем графику';
                 useVideoPlayer = false;
                 return null;
             }
             
             // Функция загрузки скримера
             async function loadScaryVideo() {
-                console.log('🔄 Загрузка скримера...');
-                videoStatus.textContent = 'Загрузка скримера...';
+                console.log('👻 Проверяем скример...');
                 
-                const scaryPaths = [
+                const scaryFiles = [
                     'jump_scare.mp4',
                     './jump_scare.mp4',
                     'scary.mp4',
                     './scary.mp4'
                 ];
                 
-                for (const path of scaryPaths) {
-                    console.log('🔍 Проверяем путь для скримера:', path);
-                    
+                for (const path of scaryFiles) {
                     try {
-                        // Простая проверка существования файла
                         const response = await fetch(path, { method: 'HEAD' });
                         if (response.ok) {
-                            console.log('✅ Скример найден по пути:', path);
+                            console.log(`✅ Скример найден: ${path}`);
                             scaryVideo.src = path;
-                            
-                            return new Promise((resolve) => {
-                                scaryVideo.addEventListener('loadeddata', () => {
-                                    console.log('✅ Скример загружен!');
-                                    resolve(true);
-                                });
-                                
-                                scaryVideo.addEventListener('error', () => {
-                                    console.log('❌ Ошибка загрузки скримера');
-                                    resolve(false);
-                                });
-                                
-                                scaryVideo.load();
-                            });
+                            scaryVideo.load();
+                            return true;
                         }
                     } catch (error) {
-                        console.log('❌ Ошибка при проверке пути скримера:', path, error);
                         continue;
                     }
                 }
@@ -954,34 +909,27 @@
                 
                 // Загружаем видео персонажа
                 if (!playerVideo) {
-                    videoStatus.textContent = 'Загрузка видео персонажа...';
-                    playerVideo = await loadPlayerVideo();
+                    videoStatus.textContent = 'Загрузка персонажа...';
+                    playerVideo = await loadVideoPlayer();
                     
-                    if (playerVideo) {
-                        console.log('✅ Видео персонажа готово к использованию');
-                        // Пробуем запустить воспроизведение
+                    if (playerVideo && playerVideoLoaded) {
                         try {
                             await playerVideo.play();
-                            console.log('✅ Видео персонажа воспроизводится');
+                            console.log('✅ Видео персонажа запущено');
                         } catch (e) {
-                            console.log('Автовоспроизведение видео заблокировано:', e);
-                            // Это нормально, видео все равно будет отрисовываться
+                            console.log('Автовоспроизведение заблокировано');
                         }
                     } else {
-                        console.log('⚠️ Видео персонажа не загружено, используем стандартную графику');
-                        videoStatus.textContent = 'Используем стандартную графику';
+                        console.log('⚠️ Используем графику вместо видео');
+                        playerVideoLoaded = false;
                     }
                 }
                 
-                // Загружаем скример
-                videoStatus.textContent = 'Загрузка скримера...';
-                const scaryLoaded = await loadScaryVideo();
+                // Загружаем скример (если есть)
+                videoStatus.textContent = 'Проверка скримера...';
+                await loadScaryVideo();
                 
-                if (!scaryLoaded) {
-                    console.log('⚠️ Скример не загружен, пропускаем его');
-                }
-                
-                // Скрываем индикатор загрузки через 1 секунду
+                // Скрываем индикатор загрузки
                 setTimeout(() => {
                     videoLoading.classList.remove('show');
                 }, 1000);
@@ -997,7 +945,9 @@
                     velocity: 0,
                     gravity: 0.5,
                     jumpPower: -12,
-                    groundY: 0
+                    groundY: 0,
+                    frame: 0,
+                    frameTimer: 0
                 };
                 
                 // Инициализация игрока
@@ -1016,63 +966,469 @@
                     });
                 }
                 
-                // Загрузка изображения машины
-                const carImg = new Image();
-                carImg.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="30" viewBox="0 0 60 30"><rect width="60" height="30" rx="5" fill="%23338ef5"/><rect x="5" y="5" width="50" height="20" rx="3" fill="%231a6fd9"/><circle cx="15" cy="25" r="4" fill="%23262626"/><circle cx="45" cy="25" r="4" fill="%23262626"/></svg>';
+                // Звёзды для фона
+                let stars = [];
+                function createStars() {
+                    stars = [];
+                    for (let i = 0; i < 50; i++) {
+                        stars.push({
+                            x: Math.random() * canvas.width,
+                            y: Math.random() * (canvas.height * 0.6),
+                            size: Math.random() * 2 + 1,
+                            speed: 0.1 + Math.random() * 0.3
+                        });
+                    }
+                }
+                createStars();
+                
+                // Отрисовка фона
+                function drawBackground() {
+                    // Ночное небо
+                    const skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height * 0.7);
+                    skyGradient.addColorStop(0, '#0a0f1a');
+                    skyGradient.addColorStop(1, '#1a202c');
+                    ctx.fillStyle = skyGradient;
+                    ctx.fillRect(0, 0, canvas.width, canvas.height * 0.7);
+                    
+                    // Звёзды
+                    ctx.fillStyle = 'white';
+                    stars.forEach(star => {
+                        ctx.beginPath();
+                        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                        ctx.fill();
+                        star.x -= star.speed;
+                        if (star.x < -10) {
+                            star.x = canvas.width + 10;
+                            star.y = Math.random() * (canvas.height * 0.6);
+                        }
+                    });
+                    
+                    // Луна
+                    ctx.fillStyle = '#fef3c7';
+                    ctx.beginPath();
+                    ctx.arc(canvas.width - 50, 50, 25, 0, Math.PI * 2);
+                    ctx.fill();
+                }
                 
                 // Отрисовка дороги
                 function drawRoad() {
-                    // Небо
-                    const skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height * 0.6);
-                    skyGradient.addColorStop(0, '#4a6fa5');
-                    skyGradient.addColorStop(1, '#87CEEB');
-                    ctx.fillStyle = skyGradient;
-                    ctx.fillRect(0, 0, canvas.width, canvas.height * 0.6);
-                    
-                    // Солнце
-                    ctx.fillStyle = '#FFD700';
-                    ctx.beginPath();
-                    ctx.arc(canvas.width - 40, 40, 25, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    // Облако
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-                    ctx.beginPath();
-                    ctx.arc(canvas.width - 150, 60, 20, 0, Math.PI * 2);
-                    ctx.arc(canvas.width - 130, 50, 25, 0, Math.PI * 2);
-                    ctx.arc(canvas.width - 110, 60, 20, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    // Горы
-                    ctx.fillStyle = '#2a4d69';
-                    ctx.beginPath();
-                    ctx.moveTo(0, canvas.height * 0.6);
-                    ctx.lineTo(100, canvas.height * 0.3);
-                    ctx.lineTo(200, canvas.height * 0.6);
-                    ctx.lineTo(300, canvas.height * 0.4);
-                    ctx.lineTo(400, canvas.height * 0.6);
-                    ctx.lineTo(canvas.width, canvas.height * 0.5);
-                    ctx.lineTo(canvas.width, canvas.height * 0.6);
-                    ctx.closePath();
-                    ctx.fill();
-                    
                     // Трава
-                    ctx.fillStyle = '#228B22';
-                    ctx.fillRect(0, canvas.height * 0.6, canvas.width, 20);
+                    ctx.fillStyle = '#14532d';
+                    ctx.fillRect(0, canvas.height * 0.7, canvas.width, 20);
                     
                     // Асфальт
-                    ctx.fillStyle = '#555';
-                    ctx.fillRect(0, canvas.height * 0.6 + 20, canvas.width, 80);
+                    ctx.fillStyle = '#334155';
+                    ctx.fillRect(0, canvas.height * 0.7 + 20, canvas.width, 80);
                     
                     // Боковые линии
-                    ctx.fillStyle = '#fff';
-                    ctx.fillRect(0, canvas.height * 0.6 + 30, canvas.width, 3);
+                    ctx.fillStyle = '#e2e8f0';
+                    ctx.fillRect(0, canvas.height * 0.7 + 30, canvas.width, 3);
                     ctx.fillRect(0, canvas.height - 30, canvas.width, 3);
                     
                     // Прерывистая линия
-                    ctx.strokeStyle = '#fff';
+                    ctx.strokeStyle = '#fbbf24';
                     ctx.lineWidth = 3;
                     ctx.setLineDash([20, 30]);
                     
                     for (let line of roadLines) {
                         ctx.beginPath();
+                        ctx.moveTo(line.x, line.y);
+                        ctx.lineTo(line.x + 15, line.y);
+                        ctx.stroke();
+                        
+                        line.x -= gameSpeed * 0.8;
+                        if (line.x < -60) {
+                            line.x = canvas.width;
+                        }
+                    }
+                    
+                    ctx.setLineDash([]);
+                }
+                
+                // Отрисовка игрока
+                function drawPlayer() {
+                    // Пробуем видео, если оно загружено
+                    if (useVideoPlayer && playerVideoLoaded && playerVideo && playerVideo.readyState >= 2) {
+                        try {
+                            if (player.ducking) {
+                                ctx.drawImage(playerVideo, player.x, player.y + 30, player.width, 70);
+                            } else {
+                                ctx.drawImage(playerVideo, player.x, player.y, player.width, player.height);
+                            }
+                            return;
+                        } catch (e) {
+                            console.log('Ошибка отрисовки видео');
+                            useVideoPlayer = false;
+                        }
+                    }
+                    
+                    // Запасная графика - динозавр
+                    const legOffset = Math.sin(Date.now() / 100) * 3;
+                    
+                    // Тело динозавра
+                    ctx.fillStyle = '#4CAF50';
+                    ctx.fillRect(player.x, player.y, player.width, player.height);
+                    
+                    // Голова
+                    ctx.fillStyle = '#388E3C';
+                    ctx.fillRect(player.x + player.width - 20, player.y - 10, 20, 20);
+                    
+                    // Глаза
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(player.x + player.width - 8, player.y - 5, 5, 5);
+                    
+                    // Ноги (анимация бега)
+                    ctx.fillStyle = '#2E7D32';
+                    ctx.fillRect(player.x + 10, player.y + player.height, 10, 15);
+                    ctx.fillRect(player.x + player.width - 20, player.y + player.height + legOffset, 10, 15);
+                    
+                    // Хвост
+                    ctx.fillStyle = '#1B5E20';
+                    ctx.beginPath();
+                    ctx.moveTo(player.x, player.y + player.height/2);
+                    ctx.lineTo(player.x - 15, player.y + player.height/2 - 10);
+                    ctx.lineTo(player.x - 15, player.y + player.height/2 + 10);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    // Приседание
+                    if (player.ducking) {
+                        ctx.fillStyle = '#2196F3';
+                        ctx.fillRect(player.x, player.y + 30, player.width, 40);
+                    }
+                }
+                
+                // Отрисовка препятствий
+                function drawObstacles() {
+                    for (let obstacle of obstacles) {
+                        // Машина
+                        ctx.fillStyle = '#e74c3c';
+                        ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                        
+                        // Окна машины
+                        ctx.fillStyle = '#3498db';
+                        ctx.fillRect(obstacle.x + 5, obstacle.y + 5, obstacle.width - 10, 10);
+                        
+                        // Колёса
+                        ctx.fillStyle = '#2c3e50';
+                        ctx.fillRect(obstacle.x + 8, obstacle.y + obstacle.height - 5, 8, 5);
+                        ctx.fillRect(obstacle.x + obstacle.width - 16, obstacle.y + obstacle.height - 5, 8, 5);
+                        
+                        // Фары
+                        ctx.fillStyle = '#f1c40f';
+                        ctx.fillRect(obstacle.x + 3, obstacle.y + 3, 6, 3);
+                        ctx.fillRect(obstacle.x + obstacle.width - 9, obstacle.y + 3, 6, 3);
+                    }
+                }
+                
+                // Обновление игры
+                function update(timestamp) {
+                    if (!gameRunning) return;
+                    
+                    // Увеличение счета
+                    score++;
+                    scoreDisplay.textContent = Math.floor(score / 10);
+                    
+                    // Медленное увеличение скорости
+                    if (score % 1000 === 0 && gameSpeed < 6) {
+                        gameSpeed += 0.3;
+                    }
+                    
+                    // Физика игрока
+                    if (player.jumping) {
+                        player.velocity += player.gravity;
+                        player.y += player.velocity;
+                        
+                        if (player.y >= player.groundY) {
+                            player.y = player.groundY;
+                            player.jumping = false;
+                            player.velocity = 0;
+                        }
+                    }
+                    
+                    // Приседание
+                    if (player.ducking && !player.jumping) {
+                        player.height = 70;
+                        player.y = player.groundY + 30;
+                    } else if (!player.jumping) {
+                        player.height = 100;
+                        player.y = player.groundY;
+                    }
+                    
+                    // Создание новых препятствий
+                    if (timestamp - lastObstacleTime > obstacleInterval) {
+                        const types = [
+                            { width: 60, height: 30, y: canvas.height - 100 },
+                            { width: 80, height: 35, y: canvas.height - 105 },
+                            { width: 70, height: 40, y: canvas.height - 110 }
+                        ];
+                        
+                        const type = Math.floor(Math.random() * types.length);
+                        obstacles.push({
+                            x: canvas.width,
+                            y: types[type].y,
+                            width: types[type].width,
+                            height: types[type].height,
+                            speed: gameSpeed + Math.random() * 1.5
+                        });
+                        
+                        lastObstacleTime = timestamp;
+                    }
+                    
+                    // Обновление препятствий
+                    for (let i = obstacles.length - 1; i >= 0; i--) {
+                        obstacles[i].x -= obstacles[i].speed;
+                        
+                        // Проверка столкновения
+                        const collisionMargin = 10;
+                        if (player.x + collisionMargin < obstacles[i].x + obstacles[i].width - collisionMargin &&
+                            player.x + player.width - collisionMargin > obstacles[i].x + collisionMargin &&
+                            player.y + collisionMargin < obstacles[i].y + obstacles[i].height - collisionMargin &&
+                            player.y + player.height - collisionMargin > obstacles[i].y + collisionMargin) {
+                            
+                            gameOver();
+                            return;
+                        }
+                        
+                        // Удаление уехавших за экран
+                        if (obstacles[i].x + obstacles[i].width < 0) {
+                            obstacles.splice(i, 1);
+                        }
+                    }
+                    
+                    // Проверка на скример (300 очков)
+                    if (score >= 3000 && !scaryShown) { // 3000 = 300 * 10
+                        scaryShown = true;
+                        showCountdown();
+                    }
+                }
+                
+                // Отрисовка кадра
+                function draw() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    
+                    drawBackground();
+                    drawRoad();
+                    drawObstacles();
+                    drawPlayer();
+                    
+                    // Отображение скорости
+                    ctx.fillStyle = 'white';
+                    ctx.font = '14px Arial';
+                    ctx.fillText(`Скорость: ${gameSpeed.toFixed(1)}`, 10, 30);
+                    
+                    // Прогресс до скримера
+                    if (!scaryShown) {
+                        const progress = Math.min((score / 10) / 300, 1);
+                        ctx.fillStyle = '#4a5568';
+                        ctx.fillRect(10, 50, 150, 10);
+                        ctx.fillStyle = '#f59e0b';
+                        ctx.fillRect(10, 50, 150 * progress, 10);
+                        
+                        ctx.fillStyle = '#cbd5e0';
+                        ctx.font = '12px Arial';
+                        ctx.fillText(`До оценки "5": ${300 - Math.floor(score/10)} очков`, 10, 75);
+                    }
+                }
+                
+                // Игровой цикл
+                function gameLoop(timestamp) {
+                    update(timestamp);
+                    draw();
+                    
+                    if (gameRunning) {
+                        gameLoopId = requestAnimationFrame(gameLoop);
+                    }
+                }
+                
+                // Конец игры
+                function gameOver() {
+                    gameRunning = false;
+                    cancelAnimationFrame(gameLoopId);
+                    
+                    setTimeout(() => {
+                        alert(`🚨 Авария!\nВаш счет: ${Math.floor(score/10)}\nПомните: соблюдайте ПДД!`);
+                        gameModal.classList.remove('show');
+                        document.body.style.overflow = 'auto';
+                    }, 500);
+                }
+                
+                // 3-секундный отсчет перед скримером
+                function showCountdown() {
+                    gameRunning = false;
+                    
+                    countdownModal.classList.add('show');
+                    
+                    let count = 3;
+                    countdownNumber.textContent = count;
+                    
+                    const countdownInterval = setInterval(() => {
+                        count--;
+                        countdownNumber.textContent = count;
+                        
+                        if (count <= 0) {
+                            clearInterval(countdownInterval);
+                            countdownModal.classList.remove('show');
+                            showScary();
+                        }
+                    }, 1000);
+                }
+                
+                // Показать скример
+                function showScary() {
+                    scaryOverlay.classList.add('show');
+                    
+                    // Пробуем воспроизвести скример, если он есть
+                    if (scaryVideo.src) {
+                        scaryVideo.currentTime = 0;
+                        scaryVideo.play().catch(e => {
+                            console.log('Не удалось воспроизвести скример:', e);
+                        });
+                    } else {
+                        // Если нет скримера, показываем сообщение
+                        scaryOverlay.innerHTML = `
+                            <div style="
+                                position: absolute;
+                                top: 50%;
+                                left: 50%;
+                                transform: translate(-50%, -50%);
+                                text-align: center;
+                                color: #fbbf24;
+                                font-size: 24px;
+                                font-weight: bold;
+                            ">
+                                🎉 Поздравляем!<br>
+                                Ты получил оценку "5"!<br>
+                                Очков: ${Math.floor(score/10)}
+                            </div>
+                        `;
+                    }
+                    
+                    // Автозакрытие через 3 секунды
+                    setTimeout(() => {
+                        scaryOverlay.classList.remove('show');
+                        if (scaryVideo.src) {
+                            scaryVideo.pause();
+                        }
+                        
+                        // Возобновляем игру
+                        gameRunning = true;
+                        gameLoop(0);
+                        
+                        // Показываем поздравление
+                        setTimeout(() => {
+                            alert(`🎊 Отлично! Ты получил оценку "5" за тренировку!\nФинальный счет: ${Math.floor(score/10)} очков`);
+                        }, 1000);
+                    }, 3000);
+                }
+                
+                // Управление
+                function jump() {
+                    if (!player.jumping && gameRunning) {
+                        player.jumping = true;
+                        player.velocity = player.jumpPower;
+                        player.ducking = false;
+                    }
+                }
+                
+                function duck(start) {
+                    if (gameRunning) {
+                        player.ducking = start;
+                    }
+                }
+                
+                // Клавиатура
+                document.addEventListener('keydown', function(e) {
+                    if (e.code === 'Space' || e.code === 'ArrowUp') {
+                        jump();
+                        e.preventDefault();
+                    } else if (e.code === 'ArrowDown') {
+                        duck(true);
+                        e.preventDefault();
+                    }
+                });
+                
+                document.addEventListener('keyup', function(e) {
+                    if (e.code === 'ArrowDown') {
+                        duck(false);
+                        e.preventDefault();
+                    }
+                });
+                
+                // Сенсорное управление
+                const mobileJump = document.getElementById('mobileJump');
+                const mobileDuck = document.getElementById('mobileDuck');
+                
+                mobileJump.addEventListener('touchstart', function(e) {
+                    jump();
+                    e.preventDefault();
+                });
+                
+                mobileDuck.addEventListener('touchstart', function(e) {
+                    duck(true);
+                    e.preventDefault();
+                });
+                
+                mobileDuck.addEventListener('touchend', function(e) {
+                    duck(false);
+                    e.preventDefault();
+                });
+                
+                // Запуск игры
+                gameLoop(0);
+            }
+            
+            // Остановка игры
+            function stopGame() {
+                gameRunning = false;
+                if (gameLoopId) {
+                    cancelAnimationFrame(gameLoopId);
+                }
+                if (playerVideo) {
+                    playerVideo.pause();
+                }
+                if (scaryVideo) {
+                    scaryVideo.pause();
+                }
+                // Скрываем все модальные окна
+                countdownModal.classList.remove('show');
+                scaryOverlay.classList.remove('show');
+            }
+        });
+        
+        // Предотвращение скролла на мобильных при игре
+        document.addEventListener('touchmove', function(e) {
+            if (document.getElementById('gameModal').classList.contains('show')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
+        // Обновление размера канваса при изменении ориентации
+        window.addEventListener('orientationchange', function() {
+            setTimeout(() => {
+                if (document.getElementById('gameModal').classList.contains('show')) {
+                    const canvas = document.getElementById('gameCanvas');
+                    const container = document.querySelector('.game-canvas-container');
+                    if (canvas && container) {
+                        canvas.width = container.clientWidth;
+                        canvas.height = Math.min(container.clientHeight, 400);
+                    }
+                }
+            }, 100);
+        });
+        
+        // Анимация пульсации кнопки игры
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 204, 0, 0.7); }
+                70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(255, 204, 0, 0); }
+                100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 204, 0, 0); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        console.log('✅ Система готова к работе!');
+    </script>
+</body>
+</html>
