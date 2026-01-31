@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Викторина по правилам дорожного движения — Яндекс Формы</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Временные стили для аватара */
+        .g-avatar__image-placeholder {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        /* Стили для ошибок */
+        .error {
+            color: #ff3333;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+        .error.show {
+            display: block;
+        }
+    </style>
+</head>
+<body class="g-root g-root_theme_dark">
+    <!-- Остальной HTML код остается таким же, как у вас -->
+    <!-- ... -->
+
+    <!-- Модальное окно успешной отправки -->
+    <div id="success-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✅ Спасибо!</h3>
+                <button class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Ваши ответы успешно отправлены.</p>
+                <p>Теперь вы можете выполнить практическое задание — сыграть в игру "Бегущий динозавр".</p>
+                <div class="quiz-result" id="quiz-result"></div>
+            </div>
+            <div class="modal-footer">
+                <button id="modal-ok-btn" class="g-button g-button_view_action">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Убираем аудио теги - будем создавать динамически -->
+</body>
+</html>
