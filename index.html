@@ -613,7 +613,7 @@
     <!-- Скример -->
     <div class="scary-overlay" id="scaryOverlay">
         <video class="scary-video" id="scaryVideo" playsinline muted>
-            <!-- ВАШЕ ВИДЕО СКРИМЕРА -->
+            <!-- Видео скримера -->
             <source src="jump_scare.mp4" type="video/mp4">
         </video>
     </div>
@@ -782,12 +782,12 @@
                 }
             }
             
-            // Функция загрузки видео персонажа
+            // Функция загрузки видео персонажа (используем runner_video.mp4)
             async function loadPlayerVideo() {
                 console.log('🔄 Загрузка видео персонажа...');
                 
                 const videoPaths = [
-                    'runner_video.mp4',
+                    'runner_video.mp4',  // Видео для персонажа игры
                     './runner_video.mp4',
                     'player_video.mp4',
                     './player_video.mp4'
@@ -800,7 +800,7 @@
                     try {
                         const exists = await checkFileExists(path);
                         if (exists) {
-                            console.log('✅ Видео найдено по пути:', path);
+                            console.log('✅ Видео персонажа найдено по пути:', path);
                             
                             const video = document.createElement('video');
                             video.src = path;
@@ -838,12 +838,12 @@
                 return null;
             }
             
-            // Функция загрузки скримера
+            // Функция загрузки скримера (используем jump_scare.mp4)
             async function loadScaryVideo() {
                 console.log('🔄 Загрузка скримера...');
                 
                 const scaryPaths = [
-                    'jump_scare.mp4',
+                    'jump_scare.mp4',  // Видео для скримера
                     './jump_scare.mp4',
                     'scary_video.mp4',
                     './scary_video.mp4'
