@@ -352,6 +352,85 @@
             margin-top: 10px;
         }
         
+        /* Предупреждение перед скримером */
+        .warning-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .warning-modal.show {
+            display: flex;
+        }
+        
+        .warning-content {
+            background: #1a1a1a;
+            border-radius: 20px;
+            padding: 25px;
+            border: 3px solid #FF3333;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            animation: pulseWarning 2s infinite;
+        }
+        
+        @keyframes pulseWarning {
+            0% { border-color: #FF3333; }
+            50% { border-color: #FF6666; }
+            100% { border-color: #FF3333; }
+        }
+        
+        .warning-title {
+            color: #FF3333;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        
+        .warning-text {
+            font-size: 18px;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+        
+        .warning-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .warning-btn {
+            padding: 14px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 120px;
+        }
+        
+        .warning-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .continue-btn {
+            background: #FF3333;
+            color: white;
+        }
+        
+        .cancel-btn {
+            background: #338ef5;
+            color: white;
+        }
+        
         /* Скример */
         .scary-overlay {
             position: fixed;
@@ -360,7 +439,7 @@
             width: 100%;
             height: 100%;
             background: #000;
-            z-index: 2000;
+            z-index: 2001;
             display: none;
         }
         
@@ -372,20 +451,6 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-        }
-        
-        .scary-close {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255,0,0,0.7);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 50%;
-            font-size: 20px;
-            cursor: pointer;
-            z-index: 2001;
         }
         
         /* Адаптация под очень маленькие экраны */
@@ -412,6 +477,10 @@
                 width: 70px;
                 height: 70px;
             }
+            
+            .warning-text {
+                font-size: 16px;
+            }
         }
         
         @media (min-width: 768px) {
@@ -433,14 +502,6 @@
             }
         }
         
-        /* Анимация загрузки */
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
-            color: #FFCC00;
-        }
-        
         /* Улучшение скролла на iOS */
         .quiz-card, .game-modal {
             -webkit-overflow-scrolling: touch;
@@ -452,6 +513,19 @@
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
+        }
+        
+        /* Индикатор загрузки видео */
+        .video-loading {
+            color: #FFCC00;
+            text-align: center;
+            padding: 10px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .video-loading.show {
+            display: block;
         }
     </style>
 </head>
@@ -537,6 +611,7 @@
             <div class="game-stats">
                 Счет: <span id="scoreDisplay">0</span>
             </div>
+            <div class="video-loading" id="videoLoading">Загрузка видео персонажа...</div>
         </div>
         
         <div class="mobile-controls">
@@ -553,13 +628,28 @@
         </div>
     </div>
     
+    <!-- Предупреждение перед скримером -->
+    <div class="warning-modal" id="warningModal">
+        <div class="warning-content">
+            <div class="warning-title">⚠️ ВНИМАНИЕ! ⚠️</div>
+            <div class="warning-text">
+                Вы достигли 300 очков!<br><br>
+                Сейчас будет показано короткое видео, которое может быть неожиданным.<br><br>
+                Вы готовы продолжить?
+            </div>
+            <div class="warning-buttons">
+                <button class="warning-btn continue-btn" id="continueScary">ПРОДОЛЖИТЬ</button>
+                <button class="warning-btn cancel-btn" id="cancelScary">ОТМЕНА</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- Скример -->
     <div class="scary-overlay" id="scaryOverlay">
         <video class="scary-video" id="scaryVideo" playsinline muted>
-            <!-- Замените src на ваш файл scary_video.mp4 -->
+            <!-- ВАШЕ ВИДЕО СКРИМЕРА -->
             <source src="scary_video.mp4" type="video/mp4">
         </video>
-        <button class="scary-close" id="closeScary">✕</button>
     </div>
 
     <script>
@@ -574,9 +664,17 @@
             const scoreText = document.getElementById('score-text');
             const gameModal = document.getElementById('gameModal');
             const closeGameBtn = document.getElementById('closeGame');
+            const warningModal = document.getElementById('warningModal');
+            const continueScaryBtn = document.getElementById('continueScary');
+            const cancelScaryBtn = document.getElementById('cancelScary');
             const scaryOverlay = document.getElementById('scaryOverlay');
             const scaryVideo = document.getElementById('scaryVideo');
-            const closeScaryBtn = document.getElementById('closeScary');
+            const videoLoading = document.getElementById('videoLoading');
+            
+            // Глобальные переменные для игры
+            let gameLoopId = null;
+            let playerVideo = null;
+            let gameRunning = false;
             
             // Выделение выбранных ответов
             document.querySelectorAll('.option').forEach(option => {
@@ -690,15 +788,20 @@
             
             // Закрытие игры
             closeGameBtn.addEventListener('click', function() {
+                stopGame();
                 gameModal.classList.remove('show');
                 document.body.style.overflow = 'auto';
-                stopGame();
             });
             
-            // Закрытие скримера
-            closeScaryBtn.addEventListener('click', function() {
-                scaryOverlay.classList.remove('show');
-                scaryVideo.pause();
+            // Обработчики предупреждения перед скримером
+            continueScaryBtn.addEventListener('click', function() {
+                warningModal.classList.remove('show');
+                showScary();
+            });
+            
+            cancelScaryBtn.addEventListener('click', function() {
+                warningModal.classList.remove('show');
+                // Продолжаем игру
             });
             
             // Автосохранение
@@ -710,6 +813,60 @@
             const savedFio = localStorage.getItem('temp_fio');
             if (savedFio) {
                 document.getElementById('fio').value = savedFio;
+            }
+            
+            // Функция создания видео элемента с проверкой
+            function createPlayerVideo() {
+                const video = document.createElement('video');
+                video.muted = true;
+                video.loop = true;
+                video.playsInline = true;
+                video.preload = 'auto';
+                
+                // Пробуем разные пути к видео
+                const videoSources = [
+                    'player_video.mp4',
+                    './player_video.mp4',
+                    'https://raw.githubusercontent.com/' + window.location.pathname.split('/')[1] + '/' + window.location.pathname.split('/')[2] + '/main/player_video.mp4'
+                ];
+                
+                let sourceIndex = 0;
+                
+                function tryNextSource() {
+                    if (sourceIndex < videoSources.length) {
+                        console.log('Пробуем источник:', videoSources[sourceIndex]);
+                        video.src = videoSources[sourceIndex];
+                        sourceIndex++;
+                    } else {
+                        console.log('Все источники видео не сработали');
+                        videoLoading.textContent = 'Видео не загружено, используется стандартный персонаж';
+                        setTimeout(() => {
+                            videoLoading.classList.remove('show');
+                        }, 2000);
+                    }
+                }
+                
+                video.addEventListener('error', function() {
+                    console.log('Ошибка загрузки видео, пробуем следующий источник');
+                    tryNextSource();
+                });
+                
+                video.addEventListener('loadeddata', function() {
+                    console.log('Видео персонажа загружено!');
+                    videoLoading.classList.remove('show');
+                });
+                
+                video.addEventListener('canplay', function() {
+                    console.log('Видео готово к воспроизведению');
+                    video.play().catch(e => {
+                        console.log('Не удалось воспроизвести видео:', e);
+                    });
+                });
+                
+                // Начинаем загрузку
+                tryNextSource();
+                
+                return video;
             }
             
             // Запуск игры
@@ -730,24 +887,16 @@
                 
                 // Игровые переменные
                 let score = 0;
-                let gameRunning = true;
-                let gameSpeed = 2.5; // МЕДЛЕННАЯ начальная скорость
+                gameRunning = true;
+                let gameSpeed = 2.5;
                 let lastObstacleTime = 0;
-                const obstacleInterval = 2000; // БОЛЬШЕ времени между препятствиями
-                let gameLoopId;
+                const obstacleInterval = 2000;
                 
-                // Видео персонажа
-                const playerVideo = document.createElement('video');
-                playerVideo.src = 'player_video.mp4';
-                playerVideo.muted = true;
-                playerVideo.loop = true;
-                playerVideo.playsInline = true;
-                playerVideo.preload = 'auto';
-                
-                // Попытка воспроизвести видео
-                playerVideo.play().catch(e => {
-                    console.log('Видео персонажа не запустилось автоматически:', e);
-                });
+                // Создаем видео персонажа
+                if (!playerVideo) {
+                    playerVideo = createPlayerVideo();
+                    videoLoading.classList.add('show');
+                }
                 
                 // Игрок
                 const player = {
@@ -854,17 +1003,23 @@
                 
                 // Отрисовка игрока
                 function drawPlayer() {
-                    // Проверяем, доступно ли видео
-                    if (playerVideo.readyState >= 2 && !player.ducking) {
+                    // Пробуем нарисовать видео, если оно загружено
+                    if (playerVideo && playerVideo.readyState >= 2) {
                         try {
-                            ctx.drawImage(playerVideo, player.x, player.y, player.width, player.height);
+                            if (player.ducking) {
+                                // Присевший персонаж
+                                ctx.drawImage(playerVideo, player.x, player.y + 30, player.width, 70);
+                            } else {
+                                // Стоящий персонаж
+                                ctx.drawImage(playerVideo, player.x, player.y, player.width, player.height);
+                            }
                             return;
                         } catch (e) {
                             console.log('Ошибка отрисовки видео:', e);
                         }
                     }
                     
-                    // Запасной вариант
+                    // Запасной вариант рисования
                     if (player.ducking) {
                         // Присевший персонаж
                         ctx.fillStyle = '#FF9900';
@@ -953,7 +1108,7 @@
                         player.y = player.groundY;
                     }
                     
-                    // Создание новых препятствий (РЕДКО)
+                    // Создание новых препятствий
                     if (timestamp - lastObstacleTime > obstacleInterval) {
                         const types = [
                             { width: 60, height: 30, y: canvas.height - 100 },
@@ -976,7 +1131,7 @@
                     for (let i = obstacles.length - 1; i >= 0; i--) {
                         obstacles[i].x -= obstacles[i].speed;
                         
-                        // Проверка столкновения (ЩАДЯЩАЯ)
+                        // Проверка столкновения
                         const collisionMargin = 15;
                         if (player.x + collisionMargin < obstacles[i].x + obstacles[i].width - collisionMargin &&
                             player.x + player.width - collisionMargin > obstacles[i].x + collisionMargin &&
@@ -996,7 +1151,7 @@
                     // Проверка на скример (300 очков)
                     if (score === 300 && !window.scaryShown) {
                         window.scaryShown = true;
-                        showScary();
+                        showWarning();
                     }
                 }
                 
@@ -1036,12 +1191,9 @@
                     }, 500);
                 }
                 
-                // Остановка игры
-                function stopGame() {
-                    gameRunning = false;
-                    if (gameLoopId) {
-                        cancelAnimationFrame(gameLoopId);
-                    }
+                // Показать предупреждение перед скримером
+                function showWarning() {
+                    warningModal.classList.add('show');
                 }
                 
                 // Показать скример
@@ -1053,11 +1205,11 @@
                         console.log('Скример не запустился:', e);
                     });
                     
-                    // Автозакрытие через 5 секунд
+                    // Автозакрытие через 4 секунды
                     setTimeout(() => {
                         scaryOverlay.classList.remove('show');
                         scaryVideo.pause();
-                    }, 5000);
+                    }, 4000);
                 }
                 
                 // Управление
@@ -1119,9 +1271,12 @@
             
             // Остановка игры
             function stopGame() {
-                // Остановка игрового цикла
-                if (window.gameLoopId) {
-                    cancelAnimationFrame(window.gameLoopId);
+                gameRunning = false;
+                if (gameLoopId) {
+                    cancelAnimationFrame(gameLoopId);
+                }
+                if (playerVideo) {
+                    playerVideo.pause();
                 }
             }
         });
