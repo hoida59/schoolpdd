@@ -4,37 +4,820 @@
     <meta charset="UTF-8">
     <title>Викторина по правилам дорожного движения — Яндекс Формы</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚦</text></svg>">
     <style>
-        /* Временные стили для аватара */
+        /* Базовые сбросы */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #000;
+            color: #fff;
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+        
+        /* Основные переменные */
+        :root {
+            --primary: #FFCC00; /* Яндекс желтый */
+            --primary-dark: #FFB800;
+            --secondary: #338EF5;
+            --background: #000000;
+            --card-bg: #1A1A1A;
+            --border: #333333;
+            --text: #FFFFFF;
+            --text-secondary: #999999;
+        }
+        
+        /* Layout */
+        .Layout {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        .Header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .Header-LogoSection {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .Logo-LogoLink {
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 600;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .Logo-LogoLink::before {
+            content: '';
+            width: 24px;
+            height: 24px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: block;
+        }
+        
+        .Header-UserSection {
+            display: flex;
+            align-items: center;
+        }
+        
         .g-avatar__image-placeholder {
             width: 42px;
             height: 42px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--secondary), #764ba2);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        /* Main Content */
+        .Layout-Content {
+            display: flex;
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 0 20px;
+        }
+        
+        .Layout-Main {
+            flex: 1;
+            padding: 32px 20px;
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        /* Блок запуска игры */
+        .game-launcher {
+            background: var(--card-bg);
+            border: 2px solid var(--primary);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 32px;
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 204, 0, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 204, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 204, 0, 0); }
+        }
+        
+        #launch-game-btn {
+            background: linear-gradient(to right, var(--primary), var(--primary-dark));
+            border: none;
+            border-radius: 12px;
+            color: #000;
+            font-size: 18px;
+            font-weight: 600;
+            padding: 18px 36px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        #launch-game-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 204, 0, 0.3);
+        }
+        
+        #launch-game-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .game-description {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 8px;
+        }
+        
+        /* Форма викторины */
+        .SurveyPage {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 32px;
+            border: 1px solid var(--border);
+        }
+        
+        .SurveyPage-Name {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 32px;
+            text-align: center;
+            color: var(--text);
+        }
+        
+        /* Вопросы */
+        .QuestionMarkup {
+            margin-bottom: 32px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .QuestionMarkup:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .QuestionLabel {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+        
+        .QuestionLabel-Required {
+            color: #FF3333;
+            margin-right: 4px;
+        }
+        
+        /* Поля ввода */
+        .g-text-input__control {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            transition: all 0.3s ease;
+        }
+        
+        .g-text-input__control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.1);
+        }
+        
+        /* Радио-кнопки */
+        .g-radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .g-control-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 16px;
+            color: var(--text);
+            padding: 12px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border);
+        }
+        
+        .g-control-label:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--primary);
+        }
+        
+        .g-control-label__indicator {
+            position: relative;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .g-radio__disc {
+            display: block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        input[type="radio"]:checked ~ .g-radio__disc {
+            border-color: var(--primary);
+            background-color: var(--primary);
+        }
+        
+        input[type="radio"]:checked ~ .g-radio__disc::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            background: #000;
+            border-radius: 50%;
+        }
+        
+        .QuestionLayout-Image {
+            max-width: 120px;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+        }
+        
+        /* Кнопка отправки */
+        .SurveyPage-Buttons {
+            margin-top: 32px;
+            text-align: center;
+        }
+        
+        .g-button {
+            background: var(--secondary);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 16px 32px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .g-button:hover {
+            background: #297CD3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(51, 142, 245, 0.3);
+        }
+        
+        .g-button:active {
+            transform: translateY(0);
+        }
+        
+        /* Footer */
+        .Footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border);
+            margin-top: auto;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        
+        .Footer-Link {
+            color: var(--text-secondary);
             font-size: 14px;
         }
         
-        /* Стили для ошибок */
-        .error {
-            color: #ff3333;
-            font-size: 12px;
-            margin-top: 5px;
+        .g-link {
+            color: var(--secondary);
+            text-decoration: none;
+        }
+        
+        .g-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* Сообщения об ошибках */
+        .error-message {
+            color: #FF3333;
+            font-size: 14px;
+            margin-top: 8px;
             display: none;
         }
-        .error.show {
+        
+        .error-message.show {
             display: block;
+        }
+        
+        /* Модальные окна */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        
+        .modal-overlay.show {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 16px;
+            max-width: 500px;
+            width: 100%;
+            border: 2px solid var(--primary);
+            overflow: hidden;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .modal-header {
+            padding: 24px;
+            background: rgba(255, 204, 0, 0.1);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h3 {
+            font-size: 20px;
+            color: var(--text);
+        }
+        
+        .modal-close-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 24px;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-close-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+        }
+        
+        .modal-body {
+            padding: 32px;
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .modal-footer {
+            padding: 24px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+        
+        .quiz-result {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 15px;
+        }
+        
+        /* Модальное окно игры */
+        .game-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            padding: 20px;
+        }
+        
+        .game-modal.show {
+            display: flex;
+        }
+        
+        .game-modal-content {
+            background: var(--card-bg);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow: hidden;
+            border: 3px solid var(--primary);
+        }
+        
+        .game-modal-header {
+            padding: 20px;
+            background: rgba(255, 204, 0, 0.1);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .game-modal-header h2 {
+            font-size: 20px;
+            color: var(--text);
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 28px;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+        }
+        
+        .game-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            background: #2D3748;
+            overflow: hidden;
+        }
+        
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #menu-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+            z-index: 10;
+        }
+        
+        #menu-screen h3 {
+            font-size: 24px;
+            color: var(--primary);
+            text-align: center;
+        }
+        
+        .score-display {
+            font-size: 20px;
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: 1px solid var(--primary);
+        }
+        
+        .btn {
+            background: var(--primary);
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 14px 28px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 200px;
+            max-width: 100%;
+        }
+        
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 204, 0, 0.3);
+        }
+        
+        .game-instructions {
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.3);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+            border-top: 1px solid var(--border);
+        }
+        
+        /* Утилиты */
+        .hidden {
+            display: none !important;
+        }
+        
+        .show {
+            display: block !important;
+        }
+        
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .Header {
+                padding: 12px 16px;
+            }
+            
+            .Layout-Main {
+                padding: 20px 0;
+            }
+            
+            .SurveyPage {
+                padding: 20px;
+            }
+            
+            .SurveyPage-Name {
+                font-size: 24px;
+            }
+            
+            .QuestionLabel {
+                font-size: 16px;
+            }
+            
+            .g-button, #launch-game-btn, .btn {
+                padding: 14px 20px;
+                font-size: 15px;
+            }
+            
+            .Footer {
+                flex-direction: column;
+                text-align: center;
+                gap: 12px;
+            }
+            
+            .modal-content, .game-modal-content {
+                max-width: 95%;
+            }
+            
+            .game-container {
+                height: 250px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .SurveyPage {
+                padding: 16px;
+            }
+            
+            .game-launcher {
+                padding: 16px;
+            }
+            
+            #launch-game-btn, .g-button, .btn {
+                width: 100%;
+            }
+            
+            .g-control-label {
+                padding: 10px 12px;
+                font-size: 14px;
+            }
         }
     </style>
 </head>
 <body class="g-root g-root_theme_dark">
-    <!-- Остальной HTML код остается таким же, как у вас -->
-    <!-- ... -->
+    <div id="root">
+        <div class="Layout">
+            <header class="Header">
+                <div class="Header-LogoSection">
+                    <a href="#" class="Logo-LogoLink">
+                        Яндекс Формы
+                    </a>
+                </div>
+                <div class="Header-UserSection">
+                    <div class="g-avatar__image-placeholder" title="LebedevArs2011">
+                        LA
+                    </div>
+                </div>
+            </header>
+            
+            <div class="Layout-Content">
+                <main class="Layout-Main">
+                    <!-- Блок запуска игры -->
+                    <div class="game-launcher">
+                        <button id="launch-game-btn" type="button" disabled>
+                            🎮 Запустить игру "Бегущий динозавр"
+                        </button>
+                        <p class="game-description">После прохождения викторины выполните это задание</p>
+                    </div>
+                    
+                    <!-- Основная форма викторины -->
+                    <div class="SurveyPage SurveyPage_hasRequired">
+                        <h1 class="SurveyPage-Name">Викторина по правилам дорожного движения</h1>
+                        
+                        <div class="SurveyPage-Content">
+                            <!-- Вопрос 1: ФИО -->
+                            <div class="QuestionMarkup TextQuestion Question">
+                                <div class="QuestionMarkup-Column QuestionMarkup-Column_column_left">
+                                    <h3 class="QuestionLabel QuestionLayout-Label">
+                                        <span class="QuestionLabel-Required">*</span>
+                                        <span class="QuestionLabel-Text">Введите ФИО и класс</span>
+                                    </h3>
+                                </div>
+                                <div class="QuestionMarkup-Column QuestionMarkup-Column_column_right">
+                                    <div class="g-text-input">
+                                        <input class="g-text-input__control" 
+                                               id="fio-input" 
+                                               placeholder="Иванов Иван Иванович, 5А" 
+                                               required>
+                                    </div>
+                                    <div class="error-message" id="fio-error"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Вопрос 2 -->
+                            <div class="QuestionMarkup RadioQuestion Question">
+                                <div class="QuestionMarkup-Column QuestionMarkup-Column_column_left">
+                                    <h3 class="QuestionLabel QuestionLayout-Label">
+                                        <span class="QuestionLabel-Required">*</span>
+                                        <span class="QuestionLabel-Text">
+                                            Если светофор на перекрестке сломан и мигает желтым светом, пешеход может начать переход, просто убедившись, что машины остановились?
+                                        </span>
+                                    </h3>
+                                </div>
+                                <div class="QuestionMarkup-Column QuestionMarkup-Column_column_right">
+                                    <div class="g-radio-group">
+                                        <label class="g-control-label">
+                                            <span class="g-control-label__indicator">
+                                                <input type="radio" name="question1" value="yes">
+                                                <span class="g-radio__disc"></span>
+                                            </span>
+                                            <span class="g-control-label__text">Да</span>
+                                        </label>
+                                        <label class="g-control-label">
+                                            <span class="g-control-label__indicator">
+                                                <input type="radio" name="question1" value="no">
+                                                <span class="g-radio__disc"></span>
+                                            </span>
+                                            <span class="g-control-label__text">Нет</span>
+                                        </label>
+                                    </div>
+                                    <div class="error-message" id="q1-error"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Вопрос 3 со знаком -->
+                            <div class="QuestionMarkup RadioQuestion Question">
+                                <div class="QuestionMarkup-Column QuestionMarkup-Column_column_left">
+                                    <h3 class="QuestionLabel QuestionLayout-Label">
+                                        <span class="QuestionLabel-Required">*</span>
+                                        <span class="QuestionLabel-Text">Что означает этот знак?</span>
+                                    </h3>
+                                </div>
+                                <div class="QuestionMarkup-Column QuestionMarkup-Column_column_right">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Road_sign_3.1_RU.svg/120px-Road_sign_3.1_RU.svg.png" 
+                                         class="QuestionLayout-Image" 
+                                         alt="Дорожный знак 'Въезд запрещен'">
+                                    <div class="g-radio-group">
+                                        <label class="g-control-label">
+                                            <span class="g-control-label__indicator">
+                                                <input type="radio" name="question2" value="enter-prohibited">
+                                                <span class="g-radio__disc"></span>
+                                            </span>
+                                            <span class="g-control-label__text">Въезд запрещен</span>
+                                        </label>
+                                        <label class="g-control-label">
+                                            <span class="g-control-label__indicator">
+                                                <input type="radio" name="question2" value="dead-end">
+                                                <span class="g-radio__disc"></span>
+                                            </span>
+                                            <span class="g-control-label__text">Впереди тупик</span>
+                                        </label>
+                                        <label class="g-control-label">
+                                            <span class="g-control-label__indicator">
+                                                <input type="radio" name="question2" value="parking-prohibited">
+                                                <span class="g-radio__disc"></span>
+                                            </span>
+                                            <span class="g-control-label__text">Стоянка запрещена</span>
+                                        </label>
+                                    </div>
+                                    <div class="error-message" id="q2-error"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Кнопка отправки -->
+                            <div class="SurveyPage-Buttons">
+                                <button id="submit-quiz-btn" type="button" class="g-button">
+                                    Отправить ответы
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+            
+            <footer class="Footer">
+                <div class="Footer-Link">
+                    Создано пользователем с помощью <a href="#" class="g-link">Яндекс Форм</a>
+                </div>
+                <div class="Footer-Link">
+                    <button id="feedback-btn" class="g-button" type="button">
+                        Обратная связь
+                    </button>
+                </div>
+                <div class="Footer-Link">
+                    © <span id="current-year">2024</span> <a href="https://ya.ru/" class="g-link">Яндекс</a>
+                </div>
+            </footer>
+        </div>
+    </div>
 
     <!-- Модальное окно успешной отправки -->
     <div id="success-modal" class="modal-overlay">
@@ -49,11 +832,412 @@
                 <div class="quiz-result" id="quiz-result"></div>
             </div>
             <div class="modal-footer">
-                <button id="modal-ok-btn" class="g-button g-button_view_action">OK</button>
+                <button id="modal-ok-btn" class="g-button">OK</button>
             </div>
         </div>
     </div>
 
-    <!-- Убираем аудио теги - будем создавать динамически -->
+    <!-- Модальное окно для игры -->
+    <div id="game-modal" class="game-modal">
+        <div class="game-modal-content">
+            <div class="game-modal-header">
+                <h2>🎮 Бегущий динозавр</h2>
+                <button id="close-game-btn" class="close-btn">&times;</button>
+            </div>
+            <div class="game-container">
+                <canvas id="game-canvas"></canvas>
+                <div id="menu-screen">
+                    <h3>Бегущий динозавр</h3>
+                    <div class="score-display">
+                        Рекорд: <span id="menu-high-score">0</span>
+                    </div>
+                    <button id="start-btn" class="btn">▶️ НАЧАТЬ ИГРУ</button>
+                </div>
+            </div>
+            <div class="game-instructions">
+                <p>👆 Клавиша SPACE или клик по правой части экрана - Прыжок</p>
+                <p>👇 Клавиша DOWN или клик по левой части экрана - Пригнуться</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Обработка формы викторины
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Страница загружена!');
+            
+            // Установка текущего года
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+            
+            // Элементы DOM
+            const submitBtn = document.getElementById('submit-quiz-btn');
+            const fioInput = document.getElementById('fio-input');
+            const feedbackBtn = document.getElementById('feedback-btn');
+            const launchBtn = document.getElementById('launch-game-btn');
+            const successModal = document.getElementById('success-modal');
+            const modalCloseBtn = document.querySelector('.modal-close-btn');
+            const modalOkBtn = document.getElementById('modal-ok-btn');
+            const quizResult = document.getElementById('quiz-result');
+            
+            // Инициализация ошибок
+            const errors = {
+                fio: document.getElementById('fio-error'),
+                q1: document.getElementById('q1-error'),
+                q2: document.getElementById('q2-error')
+            };
+            
+            // Инициализация радио-кнопок
+            initRadioButtons();
+            
+            // Обработка отправки викторины
+            submitBtn.addEventListener('click', function() {
+                console.log('Отправка формы...');
+                if (validateForm()) {
+                    const results = checkAnswers();
+                    showResults(results);
+                }
+            });
+            
+            // Запуск игры
+            launchBtn.addEventListener('click', function() {
+                console.log('Запуск игры...');
+                document.getElementById('game-modal').classList.add('show');
+                initSimpleGame();
+            });
+            
+            // Закрытие модального окна
+            modalCloseBtn.addEventListener('click', closeModal);
+            modalOkBtn.addEventListener('click', closeModal);
+            successModal.addEventListener('click', function(e) {
+                if (e.target === successModal) closeModal();
+            });
+            
+            // Закрытие игры
+            document.getElementById('close-game-btn').addEventListener('click', function() {
+                document.getElementById('game-modal').classList.remove('show');
+            });
+            
+            // Обратная связь
+            feedbackBtn.addEventListener('click', function() {
+                alert('Спасибо за обратную связь! Ваши ответы сохранены.');
+            });
+            
+            // Валидация формы
+            function validateForm() {
+                let isValid = true;
+                
+                // ФИО
+                if (!fioInput.value.trim()) {
+                    errors.fio.textContent = 'Пожалуйста, введите ФИО и класс';
+                    errors.fio.classList.add('show');
+                    fioInput.style.borderColor = '#FF3333';
+                    isValid = false;
+                } else {
+                    errors.fio.classList.remove('show');
+                    fioInput.style.borderColor = '';
+                }
+                
+                // Вопрос 1
+                const q1Checked = document.querySelector('input[name="question1"]:checked');
+                if (!q1Checked) {
+                    errors.q1.textContent = 'Пожалуйста, выберите ответ';
+                    errors.q1.classList.add('show');
+                    isValid = false;
+                } else {
+                    errors.q1.classList.remove('show');
+                }
+                
+                // Вопрос 2
+                const q2Checked = document.querySelector('input[name="question2"]:checked');
+                if (!q2Checked) {
+                    errors.q2.textContent = 'Пожалуйста, выберите ответ';
+                    errors.q2.classList.add('show');
+                    isValid = false;
+                } else {
+                    errors.q2.classList.remove('show');
+                }
+                
+                return isValid;
+            }
+            
+            // Проверка ответов
+            function checkAnswers() {
+                const answers = {
+                    q1: document.querySelector('input[name="question1"]:checked')?.value,
+                    q2: document.querySelector('input[name="question2"]:checked')?.value
+                };
+                
+                const correctAnswers = {
+                    q1: 'no',
+                    q2: 'enter-prohibited'
+                };
+                
+                let score = 0;
+                if (answers.q1 === correctAnswers.q1) score++;
+                if (answers.q2 === correctAnswers.q2) score++;
+                
+                return {
+                    score,
+                    total: 2,
+                    answers,
+                    correctAnswers
+                };
+            }
+            
+            // Показать результаты
+            function showResults(results) {
+                const percentage = Math.round((results.score / results.total) * 100);
+                
+                let resultHTML = `
+                    <strong>Результаты:</strong><br>
+                    ✅ Правильных ответов: ${results.score} из ${results.total} (${percentage}%)<br><br>
+                    <strong>Правильные ответы:</strong><br>
+                    1. Если светофор сломан и мигает желтым, пешеход должен убедиться в безопасности, но уступить дорогу всем транспортным средствам. Ответ: <strong>Нет</strong><br>
+                    2. Знак означает: <strong>Въезд запрещен</strong>
+                `;
+                
+                quizResult.innerHTML = resultHTML;
+                successModal.classList.add('show');
+                
+                // Активируем кнопку игры
+                launchBtn.disabled = false;
+                launchBtn.style.opacity = '1';
+                launchBtn.style.cursor = 'pointer';
+                launchBtn.title = 'Запустить игру';
+                
+                // Сохраняем результаты
+                saveResults(results);
+            }
+            
+            // Сохранение результатов
+            function saveResults(results) {
+                const data = {
+                    fio: fioInput.value.trim(),
+                    score: results.score,
+                    total: results.total,
+                    date: new Date().toISOString()
+                };
+                
+                localStorage.setItem('quizResults', JSON.stringify(data));
+                localStorage.setItem('quizFIO', data.fio);
+            }
+            
+            // Закрытие модального окна
+            function closeModal() {
+                successModal.classList.remove('show');
+            }
+            
+            // Инициализация радио-кнопок
+            function initRadioButtons() {
+                document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                    radio.addEventListener('change', function() {
+                        // Скрываем ошибку для этого вопроса
+                        const name = this.name;
+                        const errorId = name === 'question1' ? 'q1-error' : 'q2-error';
+                        errors[errorId === 'q1-error' ? 'q1' : 'q2'].classList.remove('show');
+                        
+                        // Подсвечиваем выбранный вариант
+                        document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+                            const label = r.closest('.g-control-label');
+                            if (label) {
+                                if (r.checked) {
+                                    label.style.backgroundColor = 'rgba(255, 204, 0, 0.1)';
+                                    label.style.borderColor = 'var(--primary)';
+                                } else {
+                                    label.style.backgroundColor = '';
+                                    label.style.borderColor = 'var(--border)';
+                                }
+                            }
+                        });
+                    });
+                });
+            }
+            
+            // Простая игра
+            function initSimpleGame() {
+                const canvas = document.getElementById('game-canvas');
+                const ctx = canvas.getContext('2d');
+                const startBtn = document.getElementById('start-btn');
+                const menuScreen = document.getElementById('menu-screen');
+                
+                // Установка размера canvas
+                const container = document.querySelector('.game-container');
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+                
+                // Игровые переменные
+                let gameRunning = false;
+                let score = 0;
+                let highScore = parseInt(localStorage.getItem('gameHighScore')) || 0;
+                document.getElementById('menu-high-score').textContent = highScore;
+                
+                // Игрок
+                const player = {
+                    x: 50,
+                    y: canvas.height - 100,
+                    width: 60,
+                    height: 80,
+                    jumping: false,
+                    velocity: 0,
+                    gravity: 0.5,
+                    jumpPower: -12
+                };
+                
+                // Препятствия
+                let obstacles = [];
+                
+                // Начало игры
+                startBtn.addEventListener('click', function() {
+                    menuScreen.classList.add('hidden');
+                    startGame();
+                });
+                
+                function startGame() {
+                    gameRunning = true;
+                    score = 0;
+                    obstacles = [];
+                    player.y = canvas.height - 100;
+                    player.jumping = false;
+                    
+                    gameLoop();
+                }
+                
+                // Игровой цикл
+                function gameLoop() {
+                    if (!gameRunning) return;
+                    
+                    update();
+                    draw();
+                    requestAnimationFrame(gameLoop);
+                }
+                
+                // Обновление игры
+                function update() {
+                    score++;
+                    
+                    // Игрок
+                    if (player.jumping) {
+                        player.velocity += player.gravity;
+                        player.y += player.velocity;
+                        
+                        if (player.y >= canvas.height - 100) {
+                            player.y = canvas.height - 100;
+                            player.jumping = false;
+                            player.velocity = 0;
+                        }
+                    }
+                    
+                    // Препятствия
+                    if (Math.random() < 0.01) {
+                        obstacles.push({
+                            x: canvas.width,
+                            y: canvas.height - 80,
+                            width: 40,
+                            height: 60,
+                            speed: 5
+                        });
+                    }
+                    
+                    obstacles.forEach((obstacle, index) => {
+                        obstacle.x -= obstacle.speed;
+                        
+                        // Проверка столкновения
+                        if (player.x < obstacle.x + obstacle.width &&
+                            player.x + player.width > obstacle.x &&
+                            player.y < obstacle.y + obstacle.height &&
+                            player.y + player.height > obstacle.y) {
+                            gameOver();
+                        }
+                        
+                        if (obstacle.x + obstacle.width < 0) {
+                            obstacles.splice(index, 1);
+                        }
+                    });
+                }
+                
+                // Отрисовка
+                function draw() {
+                    // Очистка
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    
+                    // Фон
+                    ctx.fillStyle = '#1a365d';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    
+                    // Земля
+                    ctx.fillStyle = '#2d3748';
+                    ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
+                    
+                    // Игрок
+                    ctx.fillStyle = '#38b2ac';
+                    ctx.fillRect(player.x, player.y, player.width, player.height);
+                    
+                    // Глаза
+                    ctx.fillStyle = '#fff';
+                    ctx.fillRect(player.x + player.width - 20, player.y + 15, 10, 10);
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(player.x + player.width - 18, player.y + 17, 6, 6);
+                    
+                    // Улыбка
+                    ctx.beginPath();
+                    ctx.arc(player.x + player.width - 30, player.y + 35, 10, 0, Math.PI);
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    
+                    // Препятствия
+                    ctx.fillStyle = '#e53e3e';
+                    obstacles.forEach(obstacle => {
+                        ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                    });
+                    
+                    // Счет
+                    ctx.fillStyle = '#fff';
+                    ctx.font = '20px Arial';
+                    ctx.textAlign = 'right';
+                    ctx.fillText(`Счет: ${score}`, canvas.width - 20, 30);
+                }
+                
+                // Конец игры
+                function gameOver() {
+                    gameRunning = false;
+                    
+                    if (score > highScore) {
+                        highScore = score;
+                        localStorage.setItem('gameHighScore', highScore);
+                        document.getElementById('menu-high-score').textContent = highScore;
+                    }
+                    
+                    setTimeout(() => {
+                        menuScreen.classList.remove('hidden');
+                    }, 500);
+                }
+                
+                // Управление
+                function jump() {
+                    if (!player.jumping) {
+                        player.jumping = true;
+                        player.velocity = player.jumpPower;
+                    }
+                }
+                
+                // Обработчики управления
+                document.addEventListener('keydown', function(e) {
+                    if (e.code === 'Space' || e.code === 'ArrowUp') {
+                        jump();
+                    }
+                });
+                
+                canvas.addEventListener('click', function(e) {
+                    const rect = canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    
+                    if (x > canvas.width / 2) {
+                        jump();
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>
